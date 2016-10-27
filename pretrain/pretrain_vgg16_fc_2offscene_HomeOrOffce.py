@@ -42,9 +42,11 @@ np.save(open('feature_map/bottleneck_features/test_2classes_HomeOrOff_fmap.npy',
 # train a fully connected network, Flatten+Dense+Dropout+Dense(SoftMax) with fmap
 data_train = np.load(open('feature_map/bottleneck_features/train_2classes_HomeOrOff_fmap.npy'))
 labels_train = np.array([1,0] * 21244 + [0,1] * 31955).reshape(21244+31955, 2)
+# labels_train = np.array([0] * 21244 + [1] * 31955)    # for binary
 
 data_test = np.load(open('feature_map/bottleneck_features/test_2classes_HomeOrOff_fmap.npy'))
 labels_test = np.array([1,0] * 100 + [0,1] * 100).reshape(200, 2)
+# labels_test = np.array([0] * 100 + [1] * 100)   # for binary
 
 end_time = time.time()
 print "time lapse when preparing data: {} sec".format(end_time - start_time)
@@ -55,13 +57,20 @@ model_fc.add(Flatten(input_shape=data_train.shape[1:]))
 model_fc.add(Dense(256, activation='relu'))
 model_fc.add(Dropout(0.5))
 model_fc.add(Dense(2, activation='softmax'))
+# model_fc.add(Dense(1, activation='sigmoid'))
 
 model_fc.compile(optimizer='rmsprop',
                  loss='categorical_crossentropy',
                  metrics=['accuracy'])
-nb_epoch = 20   # just for pretrain, shadow network can easily converge within small number of epochs
+# old_w = model_fc.layers[3].get_weights()[0]
+# old_b = model_fc.layers[3].get_weights()[1]
+nb_epoch = 1   # just for pretrain, shadow network can easily converge within small number of epochs
 model_fc.fit(data_train, labels_train,
              nb_epoch=nb_epoch, batch_size=batch_size,
              validation_data=(data_test, labels_test))
-# model_fc.save_weights('models/bottleneck_fc_2class_HomeOrOff_{}epochs_model.h5'.format(nb_epoch))
-model_fc.save_weights('models/bottleneck_fc_2class_HomeOrOff_model.h5')  # requried by fine-tuning
+# .. Result shows 50% accuracy on validation set, nothing improved by training fc layers, weird
+# new_w = model_fc.layers[3].get_weights()[0]
+# new_b = model_fc.layers[3].get_weights()[1]
+# model_fc.save_weights('models/bottleneck_fc_HomeOrOff_{}epochs_model.h5'.format(nb_epoch))
+model_fc.save_weights('models/bottleneck_fc_2classes_HomeOrOff_model.h5')  # for categorizing softmax
+model_fc.save_weights('models/bottleneck_fc_HomeOrOff_model.h5')  # for binary output

@@ -27,16 +27,17 @@ base_model_output = Dropout(0.5)(base_model_output)
 preds = Dense(2, activation='softmax')(base_model_output)
 # .. 2 scenes considered: home_office and office
 
-model_stacked = Model(model_vgg.input, preds)
+model_stacked = Model(model_vgg.input, preds)   # fc layers are randomly initiated
 
-f = h5py.File("models/bottleneck_fc_2class_HomeOrOff_model.h5", "r")
-g = f['dense_1']
-weights_dense_1 = [g['dense_1_W'], g['dense_1_b']]
-model_stacked.layers[20].set_weights(weights_dense_1)
-g = f['dense_2']
-weights_dense_2 = [g['dense_2_W'], g['dense_2_b']]
-model_stacked.layers[22].set_weights(weights_dense_2)
-print('Top FC layers loaded with pretrained values in .h5 file')
+# # temporary suspend loading from pretrain due to no improvement from last step
+# f = h5py.File("models/bottleneck_fc_2class_HomeOrOff_model.h5", "r")
+# g = f['dense_1']
+# weights_dense_1 = [g['dense_1_W'], g['dense_1_b']]
+# model_stacked.layers[20].set_weights(weights_dense_1)
+# g = f['dense_2']
+# weights_dense_2 = [g['dense_2_W'], g['dense_2_b']]
+# model_stacked.layers[22].set_weights(weights_dense_2)
+# print('Top FC layers loaded with pretrained values in .h5 file')
 
 # reset trainable layers in VGG16 from keras.applications
 for layer in model_stacked.layers[:15]:
@@ -61,11 +62,11 @@ generator_train = datagen_train.flow_from_directory('datasets/data_256_HomeOrOff
                                                     class_mode='categorical')
 # test
 datagen_test = ImageDataGenerator(rescale=1./255)
-generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOr/test',
+generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/test',
                                                   target_size=(img_height,img_width),
                                                   batch_size=batch_size,
                                                   class_mode='categorical')
-nb_epoch = 1                # e.g. 50
+nb_epoch = 50                # e.g. 50
 nb_train_samples = 53199    # 21244+31955=53199
 nb_test_samples = 200       # 100x2
 model_stacked.fit_generator(generator_train,
@@ -75,4 +76,4 @@ model_stacked.fit_generator(generator_train,
                             nb_val_samples=nb_test_samples)
 
 # save the pretrained parameter into models folder
-model_stacked.save_weights('models/vgg_block5fc_finetuned_4class_model.h5')
+model_stacked.save_weights('models/vgg_block5fc_finetuned_2class_HomeOrOff_model.h5')
