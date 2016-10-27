@@ -24,7 +24,7 @@ generator_train = datagen_train.flow_from_directory('data_large_3classes/train',
                                               target_size=(img_height,img_width),
                                               batch_size=32,
                                               class_mode=None,  # no labels, just data
-                                              shuffle=False)    # cats first and then dogs
+                                              shuffle=False)
 # calculate the feature map for training data
 bottleneck_features_train = model_vgg.predict_generator(generator_train, 12000)
 # .. (12000, 512, 4, 4) - 4000 * (conf, off, off_cub), 512 kernels, 4*4 feature map size
