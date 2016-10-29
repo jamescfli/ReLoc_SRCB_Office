@@ -95,13 +95,13 @@ datagen_train = ImageDataGenerator(rescale=1./255,
                                    shear_range=0.2,
                                    zoom_range=0.2,
                                    horizontal_flip=True)
-generator_train = datagen_train.flow_from_directory('data_large_3classes/train',
+generator_train = datagen_train.flow_from_directory('datasets/data_large_3classes/train',
                                                     target_size=(img_height,img_width),
                                                     batch_size=32,
                                                     class_mode='categorical')
 # test
 datagen_test = ImageDataGenerator(rescale=1./255)
-generator_test = datagen_test.flow_from_directory('data_large_3classes/validation',
+generator_test = datagen_test.flow_from_directory('datasets/data_large_3classes/validation',
                                                   target_size=(img_height,img_width),
                                                   batch_size=32,
                                                   class_mode='categorical')

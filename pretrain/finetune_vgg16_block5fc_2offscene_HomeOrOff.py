@@ -42,12 +42,14 @@ model_stacked = Model(model_vgg.input, preds)   # fc layers are randomly initiat
 # reset trainable layers in VGG16 from keras.applications
 for layer in model_stacked.layers[:15]:
     layer.trainable = False
+# 19 - train top fc layers only
 # 15 - train block5 and fc layers
 # 11 - train block5,4 and fc layers
 
 # use 'SGD' with low learning rate
 model_stacked.compile(loss='categorical_crossentropy',
-                      optimizer=SGD(lr=1e-4, momentum=0.9),
+                      # optimizer=SGD(lr=1e-4, momentum=0.9),   # for fine tuning
+                      optimizer='rmsprop',                      # train from imagenet
                       metrics=['accuracy'])
 
 # train data
@@ -66,7 +68,7 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   target_size=(img_height,img_width),
                                                   batch_size=batch_size,
                                                   class_mode='categorical')
-nb_epoch = 50                # e.g. 50
+nb_epoch = 50
 nb_train_samples = 53199    # 21244+31955=53199
 nb_test_samples = 200       # 100x2
 model_stacked.fit_generator(generator_train,
@@ -76,4 +78,5 @@ model_stacked.fit_generator(generator_train,
                             nb_val_samples=nb_test_samples)
 
 # save the pretrained parameter into models folder
-model_stacked.save_weights('models/vgg_block5fc_finetuned_2class_HomeOrOff_model.h5')
+model_stacked.save_weights('models/vgg_block5fc_finetuned_50epoch_2class_HomeOrOff_model_20161029.h5')
+# model_stacked.save_weights('models/vgg_block45fc_finetuned_50epoch_2class_HomeOrOff_model_20161029.h5')

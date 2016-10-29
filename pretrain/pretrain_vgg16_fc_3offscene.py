@@ -20,7 +20,7 @@ datagen_train = ImageDataGenerator(rescale=1./255,
                                    zoom_range=0.2,
                                    horizontal_flip=True)
 
-generator_train = datagen_train.flow_from_directory('data_large_3classes/train',
+generator_train = datagen_train.flow_from_directory('datasets/data_large_3classes/train',
                                               target_size=(img_height,img_width),
                                               batch_size=32,
                                               class_mode=None,  # no labels, just data
@@ -32,7 +32,7 @@ bottleneck_features_train = model_vgg.predict_generator(generator_train, 12000)
 np.save(open('feature_map/bottleneck_features/bottleneck_features_train.npy', 'w'), bottleneck_features_train)
 
 datagen_test = ImageDataGenerator(rescale=1./255)
-generator_test = datagen_test.flow_from_directory('data_large_3classes/validation',
+generator_test = datagen_test.flow_from_directory('datasets/data_large_3classes/validation',
                                                   target_size=(img_height,img_width),
                                                   batch_size=32,
                                                   class_mode=None,
