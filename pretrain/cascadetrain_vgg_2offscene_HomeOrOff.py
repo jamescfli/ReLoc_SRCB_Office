@@ -29,16 +29,6 @@ preds = Dense(2, activation='softmax')(base_model_output)
 
 model_stacked = Model(model_vgg.input, preds)   # fc layers are randomly initiated
 
-# # temporary suspend loading from pretrain due to no improvement from last step
-# f = h5py.File("models/bottleneck_fc_2class_HomeOrOff_model.h5", "r")
-# g = f['dense_1']
-# weights_dense_1 = [g['dense_1_W'], g['dense_1_b']]
-# model_stacked.layers[20].set_weights(weights_dense_1)
-# g = f['dense_2']
-# weights_dense_2 = [g['dense_2_W'], g['dense_2_b']]
-# model_stacked.layers[22].set_weights(weights_dense_2)
-# print('Top FC layers loaded with pretrained values in .h5 file')
-
 # reset trainable layers in VGG16 from keras.applications
 nb_frozen_layers = 19
 for layer in model_stacked.layers[:nb_frozen_layers]:
@@ -49,7 +39,7 @@ for layer in model_stacked.layers[:nb_frozen_layers]:
 
 # use 'SGD' with low learning rate
 model_stacked.compile(loss='categorical_crossentropy',
-                      optimizer=SGD(lr=1e-5, momentum=0.9),   # for fine tuning
+                      optimizer=SGD(lr=1e-4, momentum=0.9),   # for fine tuning
                       # optimizer='rmsprop',                      # train from imagenet
                       metrics=['accuracy'])
 
@@ -69,7 +59,7 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   target_size=(img_height,img_width),
                                                   batch_size=batch_size,
                                                   class_mode='categorical')
-nb_epoch = 10
+nb_epoch = 25       # 25*3 finished in 13 hours
 nb_train_samples = 53199    # 21244+31955=53199
 nb_test_samples = 200       # 100x2
 model_stacked.fit_generator(generator_train,
@@ -79,7 +69,45 @@ model_stacked.fit_generator(generator_train,
                             nb_val_samples=nb_test_samples)
 
 # save the pretrained parameter into models folder
-# model_stacked.save_weights('models/vgg_block5fc_finetuned_50epoch_2class_HomeOrOff_model_2016xxxx.h5')
-# model_stacked.save_weights('models/vgg_block45fc_finetuned_50epoch_2class_HomeOrOff_model_2016xxxx.h5')
-model_stacked.save_weights('models/vgg_{}fzlayer_finetuned_{}epoch_2class_HomeOrOff_model.h5'
+model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_2class_HomeOrOff_model.h5'
+                           .format(nb_frozen_layers, nb_epoch))
+
+# release block5 conv layers
+nb_frozen_layers = 15
+for layer in model_stacked.layers[nb_frozen_layers:19]:
+    layer.trainable = True
+
+model_stacked.compile(loss='categorical_crossentropy',
+                      optimizer=SGD(lr=1e-4, momentum=0.9),   # for fine tuning
+                      # optimizer='rmsprop',                      # train from imagenet
+                      metrics=['accuracy'])
+
+model_stacked.fit_generator(generator_train,
+                            samples_per_epoch=nb_train_samples,  # normally equal to nb of training samples
+                            nb_epoch=nb_epoch,
+                            validation_data=generator_test,
+                            nb_val_samples=nb_test_samples)
+
+# save the pretrained parameter into models folder
+model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_2class_HomeOrOff_model.h5'
+                           .format(nb_frozen_layers, nb_epoch))
+
+# further release block4 conv layers
+nb_frozen_layers = 11
+for layer in model_stacked.layers[nb_frozen_layers:15]:
+    layer.trainable = True
+
+model_stacked.compile(loss='categorical_crossentropy',
+                      optimizer=SGD(lr=1e-4, momentum=0.9),   # for fine tuning
+                      # optimizer='rmsprop',                      # train from imagenet
+                      metrics=['accuracy'])
+
+model_stacked.fit_generator(generator_train,
+                            samples_per_epoch=nb_train_samples,  # normally equal to nb of training samples
+                            nb_epoch=nb_epoch,
+                            validation_data=generator_test,
+                            nb_val_samples=nb_test_samples)
+
+# save the pretrained parameter into models folder
+model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_2class_HomeOrOff_model.h5'
                            .format(nb_frozen_layers, nb_epoch))
