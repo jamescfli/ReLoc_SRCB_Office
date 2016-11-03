@@ -38,8 +38,9 @@ for layer in model_stacked.layers[:nb_frozen_layers]:
 # 11 - train block5,4 and fc layers
 
 # use 'SGD' with low learning rate
+learning_rate = 1e-4
 model_stacked.compile(loss='categorical_crossentropy',
-                      optimizer=SGD(lr=1e-4, momentum=0.9),   # for fine tuning
+                      optimizer=SGD(lr=learning_rate, momentum=0.9),   # for fine tuning
                       # optimizer='rmsprop',                      # train from imagenet
                       metrics=['accuracy'])
 
@@ -59,9 +60,9 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   target_size=(img_height,img_width),
                                                   batch_size=batch_size,
                                                   class_mode='categorical')
-nb_epoch = 25       # 25*3 finished in 13 hours
-nb_train_samples = 53199    # 21244+31955=53199
-nb_test_samples = 200       # 100x2
+nb_epoch = 10       # 25*3 finished in ~13 hours, 10*3 in ~5 hours
+nb_train_samples = 51399    # 21244+31955=53199 2016/11/03 20344+31055 = 51399
+nb_test_samples = 2000      # 100x2 2016/11/03 1000*2
 model_stacked.fit_generator(generator_train,
                             samples_per_epoch=nb_train_samples,  # normally equal to nb of training samples
                             nb_epoch=nb_epoch,
@@ -69,8 +70,8 @@ model_stacked.fit_generator(generator_train,
                             nb_val_samples=nb_test_samples)
 
 # save the pretrained parameter into models folder
-model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_2class_HomeOrOff_model.h5'
-                           .format(nb_frozen_layers, nb_epoch))
+model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
+                           .format(nb_frozen_layers, nb_epoch, learning_rate))
 
 # release block5 conv layers
 nb_frozen_layers = 15
@@ -78,7 +79,7 @@ for layer in model_stacked.layers[nb_frozen_layers:19]:
     layer.trainable = True
 
 model_stacked.compile(loss='categorical_crossentropy',
-                      optimizer=SGD(lr=1e-4, momentum=0.9),   # for fine tuning
+                      optimizer=SGD(lr=learning_rate, momentum=0.9),   # for fine tuning
                       # optimizer='rmsprop',                      # train from imagenet
                       metrics=['accuracy'])
 
@@ -89,8 +90,8 @@ model_stacked.fit_generator(generator_train,
                             nb_val_samples=nb_test_samples)
 
 # save the pretrained parameter into models folder
-model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_2class_HomeOrOff_model.h5'
-                           .format(nb_frozen_layers, nb_epoch))
+model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
+                           .format(nb_frozen_layers, nb_epoch, learning_rate))
 
 # further release block4 conv layers
 nb_frozen_layers = 11
@@ -98,7 +99,7 @@ for layer in model_stacked.layers[nb_frozen_layers:15]:
     layer.trainable = True
 
 model_stacked.compile(loss='categorical_crossentropy',
-                      optimizer=SGD(lr=1e-4, momentum=0.9),   # for fine tuning
+                      optimizer=SGD(lr=learning_rate, momentum=0.9),   # for fine tuning
                       # optimizer='rmsprop',                      # train from imagenet
                       metrics=['accuracy'])
 
@@ -109,5 +110,5 @@ model_stacked.fit_generator(generator_train,
                             nb_val_samples=nb_test_samples)
 
 # save the pretrained parameter into models folder
-model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_2class_HomeOrOff_model.h5'
-                           .format(nb_frozen_layers, nb_epoch))
+model_stacked.save_weights('models/castrain_vgg_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
+                           .format(nb_frozen_layers, nb_epoch, learning_rate))
