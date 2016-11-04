@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import string
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 class ConvergencePlot():
     def __init__(self, filename=None, nb_line_skipped = 0):
@@ -20,22 +20,51 @@ class ConvergencePlot():
         column_list = ['time_in_sec', 'train_loss', 'train_acc', 'valid_loss', 'valid_acc']
         self.epoch_convergence_df = pd.DataFrame(epoch_convergence_array, columns=column_list)
 
-    def plt_train_valid_loss(self):
-        self.epoch_convergence_df.plot(x=np.arange(self.nb_total_epoch)+1, y=['train_loss', 'valid_loss'],
-                                       kind='line', legend=True)
+    def plt_train_valid_loss(self, nb_epoch=None):
+        if nb_epoch == None:
+            # draw full length time series, i.e. self.nb_total_epoch
+            nb_epoch = self.nb_total_epoch
+        assert nb_epoch <= self.nb_total_epoch, 'set nb_epoch exceeds nb_total_epoch = {}'.format(self.nb_total_epoch)
+        # draw series with epoch limitation
+        plt.figure()
+        plt.plot(np.arange(nb_epoch)+1, self.epoch_convergence_df['train_loss'][0:nb_epoch])
+        plt.plot(np.arange(nb_epoch)+1, self.epoch_convergence_df['valid_loss'][0:nb_epoch])
+        plt.xlim([1, nb_epoch+1])
+        plt.xlabel('epoch')
+        plt.ylabel('loss function')
+        plt.show()
 
-    def plt_train_valid_acc(self):
-        self.epoch_convergence_df.plot(x=np.arange(self.nb_total_epoch)+1, y=['train_acc', 'valid_acc'],
-                                       kind='line', legend=True)
+    def plt_train_valid_acc(self, nb_epoch=None):
+        if nb_epoch == None:
+            # draw full length time series, i.e. self.nb_total_epoch
+            nb_epoch = self.nb_total_epoch
+        assert nb_epoch <= self.nb_total_epoch, 'set nb_epoch exceeds nb_total_epoch = {}'.format(self.nb_total_epoch)
+        # draw series with epoch limitation
+        plt.figure()
+        plt.plot(np.arange(nb_epoch)+1, self.epoch_convergence_df['train_acc'][0:nb_epoch])
+        plt.plot(np.arange(nb_epoch)+1, self.epoch_convergence_df['valid_acc'][0:nb_epoch])
+        plt.xlim([1, nb_epoch+1])
+        plt.xlabel('epoch')
+        plt.ylabel('accuracy')
+        plt.show()
 
-    def plt_time_consumption(self):
-        self.epoch_convergence_df.plot(x=np.arange(self.nb_total_epoch)+1, y=['time_in_sec'],
-                                       kind='line', legend=True)
+    def plt_time_consumption(self, nb_epoch=None):
+        if nb_epoch == None:
+            # draw full length time series, i.e. self.nb_total_epoch
+            nb_epoch = self.nb_total_epoch
+        assert nb_epoch <= self.nb_total_epoch, 'set nb_epoch exceeds nb_total_epoch = {}'.format(self.nb_total_epoch)
+        # draw series with epoch limitation
+        plt.figure()
+        plt.plot(np.arange(nb_epoch)+1, self.epoch_convergence_df['time_in_sec'][0:nb_epoch])
+        plt.xlim([1, nb_epoch+1])
+        plt.xlabel('epoch')
+        plt.ylabel('time consumption (sec)')
+        plt.show()
 
 if __name__ == '__main__':
-    filename = 'castrain_vgg_11-15-19fzlayer_10epoch_lr1e-05_2class_HomeOrOff_model.txt'
-    nb_line_skipped = 6
+    filename = '../pretrain/training_procedure/smallset_vgg_11fzlayer_810epoch_lr1e-4_2class_HomeOrOff_model.txt'
+    nb_line_skipped = 8
     test_plot = ConvergencePlot(filename=filename, nb_line_skipped=nb_line_skipped)
     test_plot.plt_train_valid_loss()
     test_plot.plt_train_valid_acc()
-    test_plot.plt_time_consumption()
+    test_plot.plt_time_consumption(nb_epoch=300)
