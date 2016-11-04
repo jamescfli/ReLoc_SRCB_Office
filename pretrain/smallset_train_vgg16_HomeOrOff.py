@@ -15,7 +15,7 @@ import os
 batch_size = 32
 nb_classes = 2
 nb_img_per_class = 1000
-nb_epoch = 810          # frz 11 layers, 63sec/epoch, *810 = ~14hours
+nb_epoch = 200      # frz 11 layers, 63sec/epoch, *810 = ~14hours
 data_augmentation = True
 
 img_width, img_height = 224, 224
@@ -36,12 +36,25 @@ def load_data(path=None, grayscale=False, target_size=(img_height, img_width)):
         img = ndimage.imread(path+os.sep+'office'+os.sep+img_name)
         img_resized_transposed = imresize(img, (img_height, img_width)).transpose(2,0,1)
         im_list.append(img_resized_transposed)
-    X_train = np.asarray(im_list).astype("uint8")
-    Y_train = np.array([1,0]*nb_img_per_class+[0,1]*nb_img_per_class, dtype="uint8").reshape(nb_samples, nb_classes)
+    X_samples = np.asarray(im_list).astype("uint8")
+    Y_samples = np.array([1,0]*nb_img_per_class+[0,1]*nb_img_per_class, dtype="uint8").reshape(nb_samples, nb_classes)
 
-    # shuffle
-    from sklearn.model_selection import train_test_split    # cross_validation is deprecated and sub by model_selection
-    X_train, X_test, Y_train, Y_test = train_test_split(X_train, Y_train, test_size=0.1)    # leave 10% for testing
+    # shuffle with the same random seed for both data and label
+    np.random.seed(seed=123)
+    np.random.shuffle(X_samples)
+    np.random.seed(seed=123)
+    np.random.shuffle(Y_samples)
+    # and split
+    test_ratio = 0.1
+    nb_train_samples = int(nb_samples*(1-test_ratio))
+    X_test = X_samples[nb_train_samples:, :, :, :]
+    Y_test = Y_samples[nb_train_samples:, :]
+    X_train = X_samples[:nb_train_samples, :, :, :]
+    Y_train = Y_samples[:nb_train_samples, :]
+
+    # # shuffle and split in one step,
+    # from sklearn.model_selection import train_test_split    # split arrays into random train and test subsets
+    # X_train, X_test, Y_train, Y_test = train_test_split(X_samples, Y_samples, test_size=0.1) # test_size 0.25 by default
 
     if K.image_dim_ordering() == 'tf':
         X_train = X_train.transpose(0, 2, 3, 1)
@@ -68,8 +81,9 @@ base_model_output = model_vgg.output
 base_model_output = Flatten()(base_model_output)
 base_model_output = Dense(1024, activation='relu')(base_model_output)
 base_model_output = Dropout(0.5)(base_model_output)
-base_model_output = Dense(1024, activation='relu')(base_model_output)
-base_model_output = Dropout(0.5)(base_model_output)
+# # try to delete one Dense layer to check whether overfitting can be achieved
+# base_model_output = Dense(1024, activation='relu')(base_model_output)
+# base_model_output = Dropout(0.5)(base_model_output)
 preds = Dense(2, activation='softmax')(base_model_output)
 model_stacked = Model(model_vgg.input, preds)
 
@@ -105,7 +119,7 @@ else:
                                  samplewise_center=False,   # True: set each sample mean to 0
                                  featurewise_std_normalization=False,   # True: divide inputs by std of dataset
                                  samplewise_std_normalization=False,    # True: divide each input by its std
-                                 zca_whitening=False,
+                                 zca_whitening=False,       # no obvious improvement acc. to ZH
                                  rotation_range=0,          # randomly rotate in the range [0,180]
                                  width_shift_range=0.1,     # randomly shift horizontally
                                  height_shift_range=0.1,    # randomly shift vertically

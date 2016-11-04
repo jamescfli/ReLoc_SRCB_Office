@@ -32,6 +32,7 @@ class ConvergencePlot():
         plt.xlim([1, nb_epoch+1])
         plt.xlabel('epoch')
         plt.ylabel('loss function')
+        plt.legend(['train_loss', 'valid_loss'], loc='upper right')
         plt.show()
 
     def plt_train_valid_acc(self, nb_epoch=None):
@@ -46,6 +47,7 @@ class ConvergencePlot():
         plt.xlim([1, nb_epoch+1])
         plt.xlabel('epoch')
         plt.ylabel('accuracy')
+        plt.legend(['train_acc', 'valid_acc'], loc='lower right')
         plt.show()
 
     def plt_time_consumption(self, nb_epoch=None):
@@ -59,6 +61,7 @@ class ConvergencePlot():
         plt.xlim([1, nb_epoch+1])
         plt.xlabel('epoch')
         plt.ylabel('time consumption (sec)')
+        plt.legend(['time_in_sec'], loc='upper right')
         plt.show()
 
 if __name__ == '__main__':
