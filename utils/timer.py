@@ -15,5 +15,6 @@ class Timer(object):
         print 'Elapsed: %s' % (time.time() - self.tstart)
 
 # # usage
+# import
 # with Timer('name of timer'):
 #     # things to be timed here
