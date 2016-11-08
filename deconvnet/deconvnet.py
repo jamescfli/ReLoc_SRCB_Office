@@ -4,14 +4,8 @@ import argparse
 import numpy as np
 import sys
 from PIL import Image
-from keras.layers import (
-        Input,
-        InputLayer,
-        Flatten,
-        Dense)
-from keras.layers.convolutional import (
-        Convolution2D,
-        MaxPooling2D)
+from keras.layers import Input, InputLayer, Flatten, Dense
+from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.applications import vgg16, imagenet_utils
 import keras.backend as K
 
@@ -465,16 +459,18 @@ def argparser():
     return parser
 
 def main():
-    # parser = argparser()
-    # args = parser.parse_args()
-    # image_path = args.image
-    # layer_name = args.layer_name
-    # feature_to_visualize = args.feature
-    # visualize_mode = args.mode
-    image_path = 'deconvnet/images/husky.jpg'
-    layer_name = 'predictions'
-    feature_to_visualize = 248
-    visualize_mode = 'max'
+    parser = argparser()
+    args = parser.parse_args()
+    image_path = args.image
+    layer_name = args.layer_name
+    feature_to_visualize = args.feature
+    visualize_mode = args.mode
+
+    # # manual input parameters
+    # image_path = 'deconvnet/images/husky.jpg'
+    # layer_name = 'predictions'
+    # feature_to_visualize = 248
+    # visualize_mode = 'max'
 
     model = vgg16.VGG16(weights = 'imagenet', include_top = True)
     layer_dict = dict([(layer.name, layer) for layer in model.layers])
@@ -484,8 +480,10 @@ def main():
 
     # Load data and preprocess
     img = Image.open(image_path)
+    img.thumbnail((224, 224))
     img_array = np.array(img)
     img_array = np.transpose(img_array, (2, 0, 1))
+    # print "image shape = {}".format(img_array.shape)  # debug
     img_array = img_array[np.newaxis, :]
     img_array = img_array.astype(np.float)
     img_array = imagenet_utils.preprocess_input(img_array)
@@ -499,8 +497,8 @@ def main():
     deconv = deconv[:, :, ::-1]
     uint8_deconv = (deconv * 255).astype(np.uint8)
     img = Image.fromarray(uint8_deconv, 'RGB')
-    # img.save('results/{}_{}_{}.png'.format(layer_name, feature_to_visualize, visualize_mode))
-    img.save('deconvnet/results/{}_{}_{}.png'.format(layer_name, feature_to_visualize, visualize_mode))
+    img.save('results/{}_{}_{}.png'.format(layer_name, feature_to_visualize, visualize_mode))
+    # img.save('deconvnet/results/{}_{}_{}.png'.format(layer_name, feature_to_visualize, visualize_mode))
 
 if "__main__" == __name__:
     main()
