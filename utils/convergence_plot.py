@@ -65,7 +65,7 @@ class ConvergencePlot():
         plt.show()
 
 if __name__ == '__main__':
-    filename = '../pretrain/training_procedure/smallset_vgg2fc_11fzlayer_200epoch_lr1e-4_2class_HomeOrOff_model.txt'
+    filename = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_25epcoh_lr1e-4_2class_HomeOrOff_model.txt'
     nb_line_skipped = 8
     test_plot = ConvergencePlot(filename=filename, nb_line_skipped=nb_line_skipped)
     test_plot.plt_train_valid_loss()

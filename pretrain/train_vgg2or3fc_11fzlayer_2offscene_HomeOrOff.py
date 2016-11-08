@@ -35,7 +35,7 @@ with Timer('model & data preparation'):
     # 11 - train block5,4 and fc layers
 
     # use 'SGD' with low learning rate
-    learning_rate = 1e-3
+    learning_rate = 1e-5
     model_stacked.compile(loss='categorical_crossentropy',
                           optimizer=SGD(lr=learning_rate, momentum=0.9),   # for fine tuning
                           # optimizer='rmsprop',                      # train from imagenet
@@ -60,7 +60,7 @@ with Timer('model & data preparation'):
                                                       shuffle=True,   # default is True
                                                       class_mode='categorical')
 
-nb_epoch = 200       # 1 epoch in ? sec
+nb_epoch = 25       # 1 epoch in 1814 sec
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
 model_stacked.fit_generator(generator_train,
