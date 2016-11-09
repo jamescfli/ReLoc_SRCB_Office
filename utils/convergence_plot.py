@@ -65,9 +65,28 @@ class ConvergencePlot():
         plt.show()
 
 if __name__ == '__main__':
-    filename = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_25epcoh_lr1e-4_2class_HomeOrOff_model.txt'
+    filename_1e_3 = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_125epoch_lr1e-3_2class_HomeOrOff_model.txt'
+    filename_1e_4 = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_25epcoh_lr1e-4_2class_HomeOrOff_model.txt'
+    filename_1e_5 = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_25epoch_lr1e-5_2class_HomeOrOff_model.txt'
+
     nb_line_skipped = 8
-    test_plot = ConvergencePlot(filename=filename, nb_line_skipped=nb_line_skipped)
-    test_plot.plt_train_valid_loss()
-    test_plot.plt_train_valid_acc()
-    test_plot.plt_time_consumption()
+
+    test_plot_1e_3 = ConvergencePlot(filename=filename_1e_3, nb_line_skipped=nb_line_skipped)
+    test_plot_1e_4 = ConvergencePlot(filename=filename_1e_4, nb_line_skipped=nb_line_skipped)
+    test_plot_1e_5 = ConvergencePlot(filename=filename_1e_5, nb_line_skipped=nb_line_skipped)
+
+    plt.figure()
+    nb_epoch = 25
+    plt.plot(np.arange(nb_epoch)+1, test_plot_1e_3.epoch_convergence_df['valid_loss'][0:nb_epoch])
+    plt.plot(np.arange(nb_epoch)+1, test_plot_1e_4.epoch_convergence_df['valid_loss'][0:nb_epoch])
+    plt.plot(np.arange(nb_epoch)+1, test_plot_1e_5.epoch_convergence_df['valid_loss'][0:nb_epoch])
+    plt.xlim([1, nb_epoch])
+    plt.xlabel('epoch')
+    plt.ylabel('valid loss')
+    plt.legend(['1e-3', '1e-4', '1e-5'], loc='upper left')
+    plt.show()
+
+    # test_plot = ConvergencePlot(filename=filename, nb_line_skipped=nb_line_skipped)
+    # test_plot.plt_train_valid_loss()
+    # test_plot.plt_train_valid_acc()
+    # test_plot.plt_time_consumption()

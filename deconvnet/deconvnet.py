@@ -459,18 +459,18 @@ def argparser():
     return parser
 
 def main():
-    parser = argparser()
-    args = parser.parse_args()
-    image_path = args.image
-    layer_name = args.layer_name
-    feature_to_visualize = args.feature
-    visualize_mode = args.mode
+    # parser = argparser()
+    # args = parser.parse_args()
+    # image_path = args.image
+    # layer_name = args.layer_name
+    # feature_to_visualize = args.feature
+    # visualize_mode = args.mode
 
-    # # manual input parameters
-    # image_path = 'deconvnet/images/husky.jpg'
-    # layer_name = 'predictions'
-    # feature_to_visualize = 248
-    # visualize_mode = 'max'
+    # manual input parameters
+    image_path = 'deconvnet/images/tesla.png'
+    layer_name = 'predictions'
+    feature_to_visualize = 248
+    visualize_mode = 'max'
 
     model = vgg16.VGG16(weights = 'imagenet', include_top = True)
     layer_dict = dict([(layer.name, layer) for layer in model.layers])
