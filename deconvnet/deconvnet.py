@@ -3,7 +3,6 @@ __author__ = 'bsl'
 import argparse
 import numpy as np
 import sys
-from PIL import Image
 from keras.layers import Input, InputLayer, Flatten, Dense
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.applications import vgg16, imagenet_utils
@@ -373,7 +372,7 @@ def visualize(model, data, layer_name, feature_to_visualize, visualize_mode):
         model: Pre-trained model used to visualize data
         data: image to visualize
         layer_name: Name of layer to visualize
-        feature_to_visualize: Featuren to visualize
+        feature_to_visualize: Feature to visualize
         visualize_mode: Visualize mode, 'all' or 'max', 'max' will only pick
                         the greatest activation in a feature map and set others
                         to 0s, this will indicate which part fire the neuron
@@ -467,7 +466,9 @@ def main():
     # visualize_mode = args.mode
 
     # manual input parameters
-    image_path = 'deconvnet/images/tesla.png'
+    # image_path = 'deconvnet/images/tesla_3ch.png'
+    image_path = 'deconvnet/images/ceo_3ch.png'
+    # image_path = 'deconvnet/images/husky.jpg'
     layer_name = 'predictions'
     feature_to_visualize = 248
     visualize_mode = 'max'
@@ -479,12 +480,15 @@ def main():
         sys.exit()
 
     # Load data and preprocess
+    from PIL import Image
     img = Image.open(image_path)
-    img.thumbnail((224, 224))
+    from resizeimage import resizeimage
+    img = resizeimage.resize_contain(img, [224, 224])   # no strectching
+    # img.save('deconvnet/images/tesla_resized_contain.png', img.format)    # debug
     img_array = np.array(img)
     img_array = np.transpose(img_array, (2, 0, 1))
-    # print "image shape = {}".format(img_array.shape)  # debug
-    img_array = img_array[np.newaxis, :]
+    print "image shape = {}".format(img_array.shape)  # debug
+    img_array = img_array[np.newaxis, :]    # shape (1,3,224,224)
     img_array = img_array.astype(np.float)
     img_array = imagenet_utils.preprocess_input(img_array)
 
