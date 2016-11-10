@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import string
 import matplotlib.pyplot as plt
+import os
 
 class ConvergencePlot():
     def __init__(self, filename=None, nb_line_skipped = 0):
@@ -20,7 +21,7 @@ class ConvergencePlot():
         column_list = ['time_in_sec', 'train_loss', 'train_acc', 'valid_loss', 'valid_acc']
         self.epoch_convergence_df = pd.DataFrame(epoch_convergence_array, columns=column_list)
 
-    def plt_train_valid_loss(self, nb_epoch=None):
+    def plt_train_valid_loss(self, nb_epoch=None, save=False):
         if nb_epoch == None:
             # draw full length time series, i.e. self.nb_total_epoch
             nb_epoch = self.nb_total_epoch
@@ -33,9 +34,15 @@ class ConvergencePlot():
         plt.xlabel('epoch')
         plt.ylabel('loss function')
         plt.legend(['train_loss', 'valid_loss'], loc='upper right')
-        plt.show()
+        if save:
+            if not os.path.exists("./convergence_figures/"):
+                os.makedirs("./convergence_figures")
+            plt.savefig("./convergence_figures/loss_function.png", format='png', dpi=200)
+        else:
+            plt.show()
+            raw_input()
 
-    def plt_train_valid_acc(self, nb_epoch=None):
+    def plt_train_valid_acc(self, nb_epoch=None, save=False):
         if nb_epoch == None:
             # draw full length time series, i.e. self.nb_total_epoch
             nb_epoch = self.nb_total_epoch
@@ -48,9 +55,15 @@ class ConvergencePlot():
         plt.xlabel('epoch')
         plt.ylabel('accuracy')
         plt.legend(['train_acc', 'valid_acc'], loc='lower right')
-        plt.show()
+        if save:
+            if not os.path.exists("./convergence_figures/"):
+                os.makedirs("./convergence_figures")
+            plt.savefig("./convergence_figures/accuracy.png", format='png', dpi=200)
+        else:
+            plt.show()
+            raw_input()
 
-    def plt_time_consumption(self, nb_epoch=None):
+    def plt_time_consumption(self, nb_epoch=None, save=False):
         if nb_epoch == None:
             # draw full length time series, i.e. self.nb_total_epoch
             nb_epoch = self.nb_total_epoch
@@ -62,7 +75,13 @@ class ConvergencePlot():
         plt.xlabel('epoch')
         plt.ylabel('time consumption (sec)')
         plt.legend(['time_in_sec'], loc='upper right')
-        plt.show()
+        if save:
+            if not os.path.exists("./convergence_figures/"):
+                os.makedirs("./convergence_figures")
+            plt.savefig("./convergence_figures/time_consumption.png", format='png', dpi=200)
+        else:
+            plt.show()
+            raw_input()
 
 if __name__ == '__main__':
     filename_1e_3 = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_125epoch_lr1e-3_2class_HomeOrOff_model.txt'

@@ -388,14 +388,12 @@ def visualize(model, data, layer_name, feature_to_visualize, visualize_mode):
     for i in range(len(model.layers)):
         if isinstance(model.layers[i], Convolution2D):
             deconv_layers.append(DConvolution2D(model.layers[i]))
-            deconv_layers.append(
-                    DActivation(model.layers[i]))
+            deconv_layers.append(DActivation(model.layers[i]))
         elif isinstance(model.layers[i], MaxPooling2D):
             deconv_layers.append(DPooling(model.layers[i]))
         elif isinstance(model.layers[i], Dense):
             deconv_layers.append(DDense(model.layers[i]))
-            deconv_layers.append(
-                    DActivation(model.layers[i]))
+            deconv_layers.append(DActivation(model.layers[i]))
         elif isinstance(model.layers[i], Flatten):
             deconv_layers.append(DFlatten(model.layers[i]))
         elif isinstance(model.layers[i], InputLayer):
@@ -412,7 +410,7 @@ def visualize(model, data, layer_name, feature_to_visualize, visualize_mode):
     for i in range(1, len(deconv_layers)):
         deconv_layers[i].up(deconv_layers[i - 1].up_data)
 
-    output = deconv_layers[-1].up_data
+    output = deconv_layers[-1].up_data  # last layer output
     assert output.ndim == 2 or output.ndim == 4
     if output.ndim == 2:
         feature_map = output[:, feature_to_visualize]
@@ -425,6 +423,7 @@ def visualize(model, data, layer_name, feature_to_visualize, visualize_mode):
     elif 'all' != visualize_mode:
         print('Illegal visualize mode')
         sys.exit()
+    # 'all' will use the whole feature map
     output = np.zeros_like(output)
     if 2 == output.ndim:
         output[:, feature_to_visualize] = feature_map
@@ -436,7 +435,7 @@ def visualize(model, data, layer_name, feature_to_visualize, visualize_mode):
     for i in range(len(deconv_layers) - 2, -1, -1):
         deconv_layers[i].down(deconv_layers[i + 1].down_data)
     deconv = deconv_layers[0].down_data
-    deconv = deconv.squeeze()
+    deconv = deconv.squeeze()   # backend function to remove broadcastable dimensions from shape of array
 
     return deconv
 
@@ -466,11 +465,12 @@ def main():
     # visualize_mode = args.mode
 
     # manual input parameters
-    # image_path = 'deconvnet/images/tesla_3ch.png'
+    # image_path = 'deconvnet/images/tesla_fat_3ch.png'
     image_path = 'deconvnet/images/ceo_3ch.png'
     # image_path = 'deconvnet/images/husky.jpg'
-    layer_name = 'predictions'
-    feature_to_visualize = 248
+    layer_name = 'block5_conv3'  # options are block3_conv3_128, block4_conv2_46, block5_conv3_256
+    # .. option for predictions: 248 husky 751 race car 661 Mobile T (old car)
+    feature_to_visualize = 256
     visualize_mode = 'max'
 
     model = vgg16.VGG16(weights = 'imagenet', include_top = True)
@@ -482,15 +482,13 @@ def main():
     # Load data and preprocess
     from PIL import Image
     img = Image.open(image_path)
-    from resizeimage import resizeimage
-    img = resizeimage.resize_contain(img, [224, 224])   # no strectching
-    # img.save('deconvnet/images/tesla_resized_contain.png', img.format)    # debug
-    img_array = np.array(img)
+    img_resized = img.resize((224, 224), Image.ANTIALIAS)
+    img_array = np.array(img_resized)
     img_array = np.transpose(img_array, (2, 0, 1))
-    print "image shape = {}".format(img_array.shape)  # debug
-    img_array = img_array[np.newaxis, :]    # shape (1,3,224,224)
+    img_array = img_array[np.newaxis, :]    # shape (1,3,224,224), required by imagenet_utils.preprocess_input
     img_array = img_array.astype(np.float)
     img_array = imagenet_utils.preprocess_input(img_array)
+    print "image array shape = {}".format(img_array.shape)  # debug
 
     deconv = visualize(model, img_array, layer_name, feature_to_visualize, visualize_mode)
 
@@ -501,7 +499,7 @@ def main():
     deconv = deconv[:, :, ::-1]
     uint8_deconv = (deconv * 255).astype(np.uint8)
     img = Image.fromarray(uint8_deconv, 'RGB')
-    img.save('results/{}_{}_{}.png'.format(layer_name, feature_to_visualize, visualize_mode))
+    img.save('deconvnet/results/{}_{}_{}.png'.format(layer_name, feature_to_visualize, visualize_mode))
     # img.save('deconvnet/results/{}_{}_{}.png'.format(layer_name, feature_to_visualize, visualize_mode))
 
 if "__main__" == __name__:
