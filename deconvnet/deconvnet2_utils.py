@@ -450,13 +450,13 @@ def plot_deconv(img_index, data, Dec, target_layer, feat_map, save=False):
     plt.imshow(arr_full, aspect='auto')
     plt.tick_params(axis='both', which='both', bottom='off', top='off',
                     labelbottom='off', right='off', left='off', labelleft='off')
-    plt.xlabel(target_layer + "Filter: %s" % feat_map, fontsize=26)
+    plt.xlabel(target_layer + " Filter: %s" % feat_map, fontsize=26)
     # plt.axis("off")
     plt.tight_layout()
     if save:
         if not os.path.exists("deconvnet/figures/"):
             os.makedirs("deconvnet/figures")
-        plt.savefig("deconvnet/figures/sample_%s.png" % target_layer, format='png', dpi=200)
+        plt.savefig("deconvnet/figures/sample_{}_filter{}.png".format(target_layer, feat_map), format='png', dpi=200)
     else:
         plt.show()
         raw_input()

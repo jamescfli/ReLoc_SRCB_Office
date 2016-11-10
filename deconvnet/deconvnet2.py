@@ -205,8 +205,8 @@ if __name__ == "__main__":
     deconv_specific = True
     if deconv_specific:
         target_layer = "block4_conv2"
-        feat_map = 12
+        feat_map = 46
         num_img = 4     # <= data.shape[0] if with replace=False
         # img_index = np.random.choice(data.shape[0], num_img, replace=False)
         img_index = np.random.choice(data.shape[0], num_img, replace=True)
-        plot_deconv(img_index, data, decnet, target_layer, feat_map, save=True)
+        plot_deconv(img_index, data, decnet, target_layer, feat_map, save=False)
