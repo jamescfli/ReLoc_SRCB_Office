@@ -63,10 +63,10 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   class_mode='categorical')
 # Timer ended here
 
-nb_epoch = 1       # 1 epoch in ~890 sec
+nb_epoch = 500       # 1 epoch in ~890 sec, without interference
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
-early_stopping = EarlyStopping(monitor='loss', patience=2)  # number of epochs with no improvement
+early_stopping = EarlyStopping(monitor='val_loss', patience=2)  # number of epochs with no improvement
 history_callback = model_stacked.fit_generator(generator_train,
                                                samples_per_epoch=nb_train_samples,
                                                nb_epoch=nb_epoch,
@@ -80,13 +80,15 @@ record = np.column_stack((np.array(history_callback.epoch) + 1,
                           history_callback.history['acc'],
                           history_callback.history['val_loss'],
                           history_callback.history['val_acc']))
+
+# if model_stacked.optimizer is not isinstance(SGD):
 # np.savetxt('training_procedure/convergence_vgg2fc{}_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.csv'
-#            .format(nb_fc_nodes, nb_frozen_layers, nb_epoch, learning_rate), record, delimiter=',')
+#            .format(nb_fc_nodes, nb_frozen_layers, history_callback.epoch, learning_rate), record, delimiter=',')
 np.savetxt('training_procedure/convergence_vgg2fc{}_{}fzlayer_{}epoch_adadelta_2class_HomeOrOff_model.csv'
-           .format(nb_fc_nodes, nb_frozen_layers, nb_epoch), record, delimiter=',')
+           .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)), record, delimiter=',')
 
 # save the pretrained parameter into models folder
 # model_stacked.save_weights('models/train_vgg2fc{}_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
-#                            .format(nb_fc_nodes, nb_frozen_layers, nb_epoch, learning_rate))
+#                            .format(nb_fc_nodes, nb_frozen_layers, history_callback.epoch, learning_rate))
 model_stacked.save_weights('models/train_vgg2fc{}_{}fzlayer_{}epoch_adadelta_2class_HomeOrOff_model.h5'
-                           .format(nb_fc_nodes, nb_frozen_layers, nb_epoch))
+                           .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)))  # consider early stop
