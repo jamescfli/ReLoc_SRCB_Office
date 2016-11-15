@@ -15,13 +15,16 @@ img_height = 224
 img_size = (3, img_width, img_height)
 
 input_tensor = Input(batch_shape=(None,) + img_size)
-model_vgg = vgg16.VGG16(input_tensor=input_tensor, weights='imagenet', include_top=False)
+model_vgg = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
+# load parameters initiated by Places365 data set and check convergence
+store_path = 'models/'
+model_vgg.load_weights(store_path+'vgg16_places365_notop.h5')
 base_model_output = model_vgg.output
 base_model_output = Flatten()(base_model_output)
 nb_fc_nodes = 512
 base_model_output = Dense(nb_fc_nodes, activation='relu')(base_model_output)
 base_model_output = Dropout(0.5)(base_model_output)
-# # add one more fc layer with 256 hidden nodes
+# # add one more fc layer with 'nb_fc_nodes' hidden nodes
 # base_model_output = Dense(nb_fc_nodes, activation='relu')(base_model_output)
 # base_model_output = Dropout(0.5)(base_model_output)
 preds = Dense(2, activation='softmax')(base_model_output)   # 2 scenes: home_office and office
