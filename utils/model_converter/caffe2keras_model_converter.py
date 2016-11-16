@@ -1,3 +1,5 @@
+__author__ = 'bsl'
+
 import keras.caffe.convert as convert
 # import pprint
 # import argparse
@@ -41,7 +43,7 @@ print("Finished converting model.")
 # .. model summary is still dented but at least the model has been loaded without errors
 
 from keras.applications import vgg16
-from keras.layers import Input
+
 
 img_width = 224
 img_height = 224
