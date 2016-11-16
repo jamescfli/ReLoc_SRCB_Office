@@ -8,6 +8,8 @@ from keras.applications import vgg16
 from keras.layers import Input
 from keras.models import Model
 # from keras.callbacks import EarlyStopping
+from utils.model_converter.caffe2keras_model_converter import load_vgg16_notop_from_caffemodel
+from utils.model_converter.compare_model_parameters import equal_model
 
 # original size for train challenge is 256x256
 img_width = 224
@@ -15,11 +17,17 @@ img_height = 224
 img_size = (3, img_width, img_height)
 
 input_tensor = Input(batch_shape=(None,) + img_size)
-model_vgg = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
-# load parameters initiated by Places365 data set and check convergence
-store_path = 'models/'
-model_vgg.load_weights(store_path+'vgg16_places365_notop.h5')
-base_model_output = model_vgg.output
+
+model_vgg_places365_notop = load_vgg16_notop_from_caffemodel()
+from compare_model_parameters import equal_model
+print 'places vgg and imagenet vgg are : ' \
+      + ('the same' if equal_model(model_vgg_places365_notop,
+                                   vgg16.VGG16(input_tensor=input_tensor,
+                                               weights='imagenet',
+                                               include_top=False))
+         else 'different')
+
+base_model_output = model_vgg_places365_notop.output
 base_model_output = Flatten()(base_model_output)
 nb_fc_nodes = 512
 base_model_output = Dense(nb_fc_nodes, activation='relu')(base_model_output)
@@ -28,7 +36,7 @@ base_model_output = Dropout(0.5)(base_model_output)
 # base_model_output = Dense(nb_fc_nodes, activation='relu')(base_model_output)
 # base_model_output = Dropout(0.5)(base_model_output)
 preds = Dense(2, activation='softmax')(base_model_output)   # 2 scenes: home_office and office
-model_stacked = Model(model_vgg.input, preds)   # fc layers are randomly initiated
+model_stacked = Model(model_vgg_places365_notop.input, preds)   # fc layers are randomly initiated
 
 # reset trainable layers in VGG16 from keras.applications
 nb_frozen_layers = 0
