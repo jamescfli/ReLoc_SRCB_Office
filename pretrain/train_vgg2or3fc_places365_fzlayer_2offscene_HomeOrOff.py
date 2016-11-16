@@ -8,7 +8,7 @@ from keras.applications import vgg16
 from keras.layers import Input
 from keras.models import Model
 # from keras.callbacks import EarlyStopping
-from utils.model_converter.caffe2keras_model_converter import load_vgg16_notop_from_caffemodel
+# from utils.model_converter.caffe2keras_model_converter import load_vgg16_notop_from_caffemodel
 from utils.model_converter.compare_model_parameters import equal_model
 
 # original size for train challenge is 256x256
@@ -18,8 +18,11 @@ img_size = (3, img_width, img_height)
 
 input_tensor = Input(batch_shape=(None,) + img_size)
 
-model_vgg_places365_notop = load_vgg16_notop_from_caffemodel()
-from compare_model_parameters import equal_model
+# # load from caffe model
+# model_vgg_places365_notop = load_vgg16_notop_from_caffemodel()
+# load from converted keras model
+model_vgg_places365_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
+model_vgg_places365_notop.load_weights('models/vgg16_places365_notop.h5')
 print 'places vgg and imagenet vgg are : ' \
       + ('the same' if equal_model(model_vgg_places365_notop,
                                    vgg16.VGG16(input_tensor=input_tensor,
@@ -72,8 +75,8 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   shuffle=True,   # default is True
                                                   class_mode='categorical')
 
-# TODO train 100 first to check the consistence btw loss and val_loss
-nb_epoch = 100       # 1 epoch in ~890 sec, without interference
+# TODO train 30 first to check the consistence btw loss and val_loss, try different lr's
+nb_epoch = 30       # 1 epoch in ~890 sec, without interference
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
 history_callback = model_stacked.fit_generator(generator_train,
