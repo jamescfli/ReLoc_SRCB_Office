@@ -102,12 +102,12 @@ record = np.column_stack((np.array(history_callback.epoch) + 1,
 
 if isinstance(model_stacked.optimizer, Adadelta):
     np.savetxt('training_procedure/convergence_vgg2fc{}_places_{}fzlayer_{}epoch_adadelta_2class_HomeOrOff_model.csv'
-               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), record, delimiter=','))
+               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)), record, delimiter=',')
     model_stacked.save_weights('models/train_vgg2fc{}_places_{}fzlayer_{}epoch_adadelta_2class_HomeOrOff_model.h5'
                                .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)))
 elif isinstance(model_stacked.optimizer, RMSprop):
     np.savetxt('training_procedure/convergence_vgg2fc{}_places_{}fzlayer_{}epoch_rmsprop_2class_HomeOrOff_model.csv'
-               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), record, delimiter=','))
+               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)), record, delimiter=',')
     model_stacked.save_weights('models/train_vgg2fc{}_places_{}fzlayer_{}epoch_rmsprop_2class_HomeOrOff_model.h5'
                                .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)))
 elif isinstance(model_stacked.optimizer, SGD):
