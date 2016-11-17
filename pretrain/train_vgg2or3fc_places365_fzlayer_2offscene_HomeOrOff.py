@@ -53,8 +53,8 @@ for layer in model_stacked.layers[:nb_frozen_layers]:
 learning_rate = 1e-4
 model_stacked.compile(loss='categorical_crossentropy',
                       # optimizer=SGD(lr=learning_rate, momentum=0.9),   # for fine tuning
-                      # optimizer='adadelta',
-                      optimizer='rmsprop',
+                      optimizer='adadelta',
+                      # optimizer='rmsprop',
                       metrics=['accuracy'])
 
 # train data
@@ -76,8 +76,8 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   shuffle=True,   # default is True
                                                   class_mode='categorical')
 
-# TODO train 50 first to check the consistence btw loss and val_loss, try different lr's
-nb_epoch = 1       # 1 epoch in ~890 sec, without interference
+# TODO train 20 first to check the consistence btw loss and val_loss, try different lr's
+nb_epoch = 20       # 1 epoch in ~890 sec, without interference
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
 history_callback = model_stacked.fit_generator(generator_train,
