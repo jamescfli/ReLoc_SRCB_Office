@@ -9,7 +9,7 @@ from keras.layers import Input
 from keras.models import Model
 # from keras.callbacks import EarlyStopping
 # from utils.model_converter.caffe2keras_model_converter import load_vgg16_notop_from_caffemodel
-from utils.model_converter.compare_model_parameters import equal_model
+# from utils.model_converter.compare_model_parameters import equal_model
 
 # original size for train challenge is 256x256
 img_width = 224
@@ -23,12 +23,12 @@ input_tensor = Input(batch_shape=(None,) + img_size)
 # load from converted keras model
 model_vgg_places365_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
 model_vgg_places365_notop.load_weights('models/vgg16_places365_notop.h5')
-print 'places vgg and imagenet vgg are : ' \
-      + ('the same' if equal_model(model_vgg_places365_notop,
-                                   vgg16.VGG16(input_tensor=input_tensor,
-                                               weights='imagenet',
-                                               include_top=False))
-         else 'different')
+# print 'places vgg and imagenet vgg are : ' \
+#       + ('the same' if equal_model(model_vgg_places365_notop,
+#                                    vgg16.VGG16(input_tensor=input_tensor,
+#                                                weights='imagenet',
+#                                                include_top=False))
+#          else 'different')
 
 base_model_output = model_vgg_places365_notop.output
 base_model_output = Flatten()(base_model_output)
@@ -42,7 +42,7 @@ preds = Dense(2, activation='softmax')(base_model_output)   # 2 scenes: home_off
 model_stacked = Model(model_vgg_places365_notop.input, preds)   # fc layers are randomly initiated
 
 # reset trainable layers in VGG16 from keras.applications
-nb_frozen_layers = 0
+nb_frozen_layers = 19
 for layer in model_stacked.layers[:nb_frozen_layers]:
     layer.trainable = False
 # 19 - train top fc layers only
@@ -50,14 +50,15 @@ for layer in model_stacked.layers[:nb_frozen_layers]:
 # 11 - train block5,4 and fc layers
 
 # use 'SGD' with low learning rate
-learning_rate = 1e-5
+# learning_rate = 1e-4
 model_stacked.compile(loss='categorical_crossentropy',
-                      optimizer=SGD(lr=learning_rate, momentum=0.9),   # for fine tuning
-                      # optimizer='adadelta',                      # train from imagenet
+                      # optimizer=SGD(lr=learning_rate, momentum=0.9),   # for fine tuning
+                      # optimizer='adadelta',
+                      optimizer='rmsprop',
                       metrics=['accuracy'])
 
 # train data
-batch_size = 64    # used to be 32
+batch_size = 32    # used to be 32
 datagen_train = ImageDataGenerator(rescale=1./255,
                                    shear_range=0.2,
                                    zoom_range=0.2,
@@ -75,8 +76,8 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   shuffle=True,   # default is True
                                                   class_mode='categorical')
 
-# TODO train 30 first to check the consistence btw loss and val_loss, try different lr's
-nb_epoch = 30       # 1 epoch in ~890 sec, without interference
+# TODO train 50 first to check the consistence btw loss and val_loss, try different lr's
+nb_epoch = 1       # 1 epoch in ~890 sec, without interference
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
 history_callback = model_stacked.fit_generator(generator_train,
@@ -101,12 +102,17 @@ record = np.column_stack((np.array(history_callback.epoch) + 1,
 
 if isinstance(model_stacked.optimizer, Adadelta):
     np.savetxt('training_procedure/convergence_vgg2fc{}_{}fzlayer_{}epoch_adadelta_2class_HomeOrOff_model.csv'
-               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)), record, delimiter=',')
+               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), record, delimiter=',')
     model_stacked.save_weights('models/train_vgg2fc{}_{}fzlayer_{}epoch_adadelta_2class_HomeOrOff_model.h5'
                            .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)))
+elif isinstance(model_stacked.optimizer, RMSprop):
+    np.savetxt('training_procedure/convergence_vgg2fc{}_{}fzlayer_{}epoch_rmsprop_2class_HomeOrOff_model.csv'
+               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), record, delimiter=',')
+    model_stacked.save_weights('models/train_vgg2fc{}_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
+                               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1)))
 elif isinstance(model_stacked.optimizer, SGD):
     np.savetxt('training_procedure/convergence_vgg2fc{}_{}fzlayer_{}epoch_sgdlr{}_2class_HomeOrOff_model.csv'
-               .format(nb_fc_nodes, nb_frozen_layers, history_callback.epoch, learning_rate), record, delimiter=',')
+               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), learning_rate), record, delimiter=',')
     model_stacked.save_weights('models/train_vgg2fc{}_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
-                               .format(nb_fc_nodes, nb_frozen_layers, history_callback.epoch, learning_rate))
+                               .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), learning_rate))
 
