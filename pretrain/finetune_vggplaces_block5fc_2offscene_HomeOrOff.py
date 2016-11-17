@@ -33,9 +33,9 @@ model_stacked_pretrained.load_weights('models/'+model_file)
 nb_frozen_layers = 11
 for layer in model_stacked_pretrained.layers[:nb_frozen_layers]:
     layer.trainable = False
-# 19 - train top fc layers only
-# 15 - train block5 and fc layers
-# 11 - train block5,4 and fc layers
+# 19 - train top fc layers only, ~400s/epoch
+# 15 - train block5 and fc layers, s/epoch
+# 11 - train block5,4 and fc layers, ~800s/epoch
 
 # use 'SGD' with low learning rate
 learning_rate = 1e-5
@@ -62,8 +62,8 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   shuffle=True,   # default is True
                                                   class_mode='categorical')
 
-# TODO train 1 first to check the consistence btw loss and val_loss, try different lr's
-nb_epoch = 1       # 1 epoch in ~890 sec, without interference
+# TODO train 50 first to check the consistence btw loss and val_loss, try different lr's
+nb_epoch = 50       # 1 epoch in ~890 sec, without interference
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
 history_callback = model_stacked_pretrained.fit_generator(generator_train,
