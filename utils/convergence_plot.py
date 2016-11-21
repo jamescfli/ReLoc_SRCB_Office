@@ -4,6 +4,7 @@ import string
 import matplotlib.pyplot as plt
 import os
 
+
 class ConvergencePlot():
     def __init__(self, filename=None, nb_line_skipped = 0):
         with open(filename, 'r') as epoch_file:

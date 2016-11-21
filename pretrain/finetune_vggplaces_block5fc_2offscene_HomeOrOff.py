@@ -26,9 +26,9 @@ base_model_output = Dropout(0.5)(base_model_output)
 # base_model_output = Dropout(0.5)(base_model_output)
 preds = Dense(2, activation='softmax')(base_model_output)   # 2 scenes: home_office and office
 model_stacked_pretrained = Model(model_vgg_notop.input, preds)   # fc layers are randomly initiated
-# model_file = 'train_vgg2fc512_places_19fzlayer_20epoch_adadelta_2class_HomeOrOff_model.h5'
+model_file = 'train_vgg2fc512_places_19fzlayer_20epoch_adadelta_2class_HomeOrOff_model.h5'
 # keep fine tuning with 1e-5 for more epochs
-model_file = 'train_vgg2fc512_places_fineT_11fzlayer_50epoch_lr1e-5_2class_HomeOrOff_model.h5'
+# model_file = 'train_vgg2fc512_places_fineT_11fzlayer_50epoch_lr1e-5_2class_HomeOrOff_model.h5'
 model_stacked_pretrained.load_weights('models/'+model_file)
 
 # reset trainable layers in VGG16 from keras.applications
@@ -65,8 +65,7 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   class_mode='categorical')
 
 # train 50 first to check the consistence btw loss and val_loss, try different lr's
-# TODO train another 100 epochs for 1e-5 fine-tuning to check improvement
-nb_epoch = 100       # 1 epoch in ~890 sec, without interference
+nb_epoch = 100       # 1 epoch in ~890 sec TitanX ~530 sec GTX1080, 17043 sec CPU without interference
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
 history_callback = model_stacked_pretrained.fit_generator(generator_train,
@@ -83,15 +82,15 @@ record = np.column_stack((np.array(history_callback.epoch) + 1,
                           history_callback.history['val_acc']))
 
 
-# np.savetxt('training_procedure/convergence_vgg2fc{}_places_fineT_{}fzlayer_{}epoch_sgdlr{}_2class_HomeOrOff_model.csv'
-#            .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), learning_rate), record, delimiter=',')
-# model_stacked_pretrained\
-#     .save_weights('models/train_vgg2fc{}_places_fineT_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
-#                   .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), learning_rate))
-
-# epoch from 51 to 150, totally 150 epochs for lr = 1e-5
-np.savetxt('training_procedure/convergence_vgg2fc{}_places_fineT_{}fzlayer_p{}epoch_sgdlr{}_2class_HomeOrOff_model.csv'
+np.savetxt('training_procedure/convergence_vgg2fc{}_places_fineT_{}fzlayer_{}epoch_sgdlr{}_2class_HomeOrOff_model.csv'
            .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), learning_rate), record, delimiter=',')
 model_stacked_pretrained\
     .save_weights('models/train_vgg2fc{}_places_fineT_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
-                  .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1+50), learning_rate))
+                  .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), learning_rate))
+
+# epoch from 51 to 150, totally 150 epochs for lr = 1e-5
+# np.savetxt('training_procedure/convergence_vgg2fc{}_places_fineT_{}fzlayer_p{}epoch_sgdlr{}_2class_HomeOrOff_model.csv'
+#            .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1), learning_rate), record, delimiter=',')
+# model_stacked_pretrained\
+#     .save_weights('models/train_vgg2fc{}_places_fineT_{}fzlayer_{}epoch_lr{}_2class_HomeOrOff_model.h5'
+#                   .format(nb_fc_nodes, nb_frozen_layers, (history_callback.epoch[-1]+1+50), learning_rate))
