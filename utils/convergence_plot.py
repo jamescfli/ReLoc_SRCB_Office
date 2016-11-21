@@ -6,21 +6,37 @@ import os
 
 
 class ConvergencePlot():
-    def __init__(self, filename=None, nb_line_skipped = 0):
-        with open(filename, 'r') as epoch_file:
-            lines = epoch_file.readlines()[nb_line_skipped:]
-            lines = lines[1::2]     # skip line intermittently
-        self.nb_total_epoch = lines.__len__()
-        epoch_convergence_array = np.zeros((self.nb_total_epoch, 5), dtype='float32')
-        for index, line in enumerate(lines):
-            items = line.split(' ')
-            select_items = items[3::3]
-            select_items[0] = select_items[0].rstrip(string.ascii_letters)  # delete 'sec'
-            select_items[4] = select_items[4].rstrip(string.whitespace)     # delete '\n'
-            select_items_in_float = [float(item) for item in select_items]
-            epoch_convergence_array[index, :] = select_items_in_float
-        column_list = ['time_in_sec', 'train_loss', 'train_acc', 'valid_loss', 'valid_acc']
-        self.epoch_convergence_df = pd.DataFrame(epoch_convergence_array, columns=column_list)
+    def __init__(self, filename=None, nb_line_skipped=0):
+        filetype = filename.split('.')[-1]
+        if filetype == 'csv':
+            with open(filename, 'r') as epoch_file:
+                lines = epoch_file.readlines()[nb_line_skipped:]
+            self.nb_total_epoch = lines.__len__()
+            epoch_convergence_array = np.zeros((self.nb_total_epoch, 4), dtype='float32')
+            for index, line in enumerate(lines):
+                items = line.split(',')
+                epoch_convergence_array[index, :] = np.array(items[1:])     # discard epoch index
+            column_list = ['train_loss', 'train_acc', 'valid_loss', 'valid_acc']
+            self.epoch_convergence_df = pd.DataFrame(epoch_convergence_array, columns=column_list)
+        elif filetype == 'txt':
+            with open(filename, 'r') as epoch_file:
+                lines = epoch_file.readlines()[nb_line_skipped:]
+                lines = lines[1::2]  # skip line intermittently
+            self.nb_total_epoch = lines.__len__()
+            epoch_convergence_array = np.zeros((self.nb_total_epoch, 5), dtype='float32')
+            for index, line in enumerate(lines):
+                items = line.split(' ')
+                select_items = items[3::3]
+                select_items[0] = select_items[0].rstrip(string.ascii_letters)  # delete 'sec'
+                select_items[4] = select_items[4].rstrip(string.whitespace)  # delete '\n'
+                select_items_in_float = [float(item) for item in select_items]
+                epoch_convergence_array[index, :] = select_items_in_float
+            column_list = ['time_in_sec', 'train_loss', 'train_acc', 'valid_loss', 'valid_acc']
+            self.epoch_convergence_df = pd.DataFrame(epoch_convergence_array, columns=column_list)
+        else:
+            print 'wrong file name extension'
+
+
 
     def plt_train_valid_loss(self, nb_epoch=None, save=False):
         if nb_epoch == None:
@@ -85,28 +101,25 @@ class ConvergencePlot():
             raw_input()
 
 if __name__ == '__main__':
-    filename_1e_3 = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_125epoch_lr1e-3_2class_HomeOrOff_model.txt'
-    filename_1e_4 = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_25epcoh_lr1e-4_2class_HomeOrOff_model.txt'
-    filename_1e_5 = 'pretrain/training_procedure/train_vgg2fc_11fzlayer_25epoch_lr1e-5_2class_HomeOrOff_model.txt'
+    path_name = 'pretrain/training_procedure/'
+    file_name_1e3 = 'convergence_vgg2fc512_places_fineT_11fzlayer_25epoch_sgdlr1e-3_2class_HomeOrOff_model.csv'
+    file_name_1e4 = 'convergence_vgg2fc512_places_fineT_11fzlayer_50epoch_sgdlr1e-4_2class_HomeOrOff_model.csv'
+    file_name_1e5 = 'convergence_vgg2fc512_places_fineT_11fzlayer_50epoch_sgdlr1e-5_2class_HomeOrOff_model.csv'
+    file_name_1e6 = 'convergence_vgg2fc512_places_fineT_11fzlayer_100epoch_sgdlr1e-6_2class_HomeOrOff_model.csv'
 
-    nb_line_skipped = 8
-
-    test_plot_1e_3 = ConvergencePlot(filename=filename_1e_3, nb_line_skipped=nb_line_skipped)
-    test_plot_1e_4 = ConvergencePlot(filename=filename_1e_4, nb_line_skipped=nb_line_skipped)
-    test_plot_1e_5 = ConvergencePlot(filename=filename_1e_5, nb_line_skipped=nb_line_skipped)
+    test_plot_1e3 = ConvergencePlot(filename=path_name+file_name_1e3)
+    test_plot_1e4 = ConvergencePlot(filename=path_name+file_name_1e4)
+    test_plot_1e5 = ConvergencePlot(filename=path_name+file_name_1e5)
+    test_plot_1e6 = ConvergencePlot(filename=path_name+file_name_1e6)
 
     plt.figure()
-    nb_epoch = 25
-    plt.plot(np.arange(nb_epoch)+1, test_plot_1e_3.epoch_convergence_df['valid_loss'][0:nb_epoch])
-    plt.plot(np.arange(nb_epoch)+1, test_plot_1e_4.epoch_convergence_df['valid_loss'][0:nb_epoch])
-    plt.plot(np.arange(nb_epoch)+1, test_plot_1e_5.epoch_convergence_df['valid_loss'][0:nb_epoch])
-    plt.xlim([1, nb_epoch])
+    plt.plot(np.arange(test_plot_1e3.nb_total_epoch)+1, test_plot_1e3.epoch_convergence_df['train_loss'])
+    plt.plot(np.arange(test_plot_1e4.nb_total_epoch)+1, test_plot_1e4.epoch_convergence_df['train_loss'])
+    plt.plot(np.arange(test_plot_1e5.nb_total_epoch)+1, test_plot_1e5.epoch_convergence_df['train_loss'])
+    plt.plot(np.arange(test_plot_1e6.nb_total_epoch)+1, test_plot_1e6.epoch_convergence_df['train_loss'])
+    plt.xlim([1, 100])
     plt.xlabel('epoch')
-    plt.ylabel('valid loss')
-    plt.legend(['1e-3', '1e-4', '1e-5'], loc='upper left')
+    plt.ylabel('loss')
+    plt.legend(['1e-3', '1e-4', '1e-5', '1e-6'], loc='upper right')
     plt.show()
-
-    # test_plot = ConvergencePlot(filename=filename, nb_line_skipped=nb_line_skipped)
-    # test_plot.plt_train_valid_loss()
-    # test_plot.plt_train_valid_acc()
-    # test_plot.plt_time_consumption()
+    raw_input()
