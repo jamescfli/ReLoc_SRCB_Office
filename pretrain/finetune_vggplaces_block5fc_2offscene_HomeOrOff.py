@@ -6,6 +6,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.applications import vgg16
 from keras.layers import Input
 from keras.models import Model
+from utils.loss_acc_history_rtplot import LossAccRTPlot
 
 # original size for train challenge is 256x256
 img_width = 224
@@ -32,7 +33,7 @@ model_file = 'train_vgg2fc512_places_19fzlayer_20epoch_adadelta_2class_HomeOrOff
 model_stacked_pretrained.load_weights('models/'+model_file)
 
 # reset trainable layers in VGG16 from keras.applications
-nb_frozen_layers = 11
+nb_frozen_layers = 15
 for layer in model_stacked_pretrained.layers[:nb_frozen_layers]:
     layer.trainable = False
 # 19 - train top fc layers only, ~400s/epoch
@@ -68,11 +69,13 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
 nb_epoch = 100       # 1 epoch in ~890 sec TitanX ~530 sec GTX1080, 17043 sec CPU without interference
 nb_train_samples = 51399    # 2016/11/03 20344+31055 = 51399
 nb_test_samples = 2000      # 2016/11/03 1000*2
+loss_acc_rtplot = LossAccRTPlot()
 history_callback = model_stacked_pretrained.fit_generator(generator_train,
                                                           samples_per_epoch=nb_train_samples,
                                                           nb_epoch=nb_epoch,
                                                           validation_data=generator_test,
-                                                          nb_val_samples=nb_test_samples)
+                                                          nb_val_samples=nb_test_samples,
+                                                          callbacks=[loss_acc_rtplot])
 
 import numpy as np
 record = np.column_stack((np.array(history_callback.epoch) + 1,
