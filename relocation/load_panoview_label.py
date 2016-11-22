@@ -16,7 +16,7 @@ def load_data():
     image_filename_list, label_array = load_labels(dirname_label+label_filename)
     image_array = np.array([img_to_array(Image.open(dirname_image+fname)) for fname in image_filename_list])
     # note vgg preprocess reuse applications.image_utils' preprocess_input
-    return vgg16.preprocess_input(image_array), label_array
+    return vgg16.preprocess_input(image_array)/255.0, label_array   # to make it btw [-0.5, +0.5], ImageNet setting
 
 
 def load_labels(label_filename):
