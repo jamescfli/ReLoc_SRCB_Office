@@ -5,13 +5,13 @@ from keras.applications import vgg16
 from keras.layers import Dense, Flatten, Dropout
 from keras.models import Model
 from keras.optimizers import SGD
+from utils.custom_image import ImageDataGenerator
 
-from load_panoview_label import load_data
 import numpy as np
-from utils.timer import Timer
+from utils.loss_acc_history_rtplot import LossRTPlot
 
 
-img_width = 224*4
+img_width = 224*4   # 896 in the horizontal direction
 img_height = 224
 img_size = (3, img_width, img_height)
 input_tensor = Input(batch_shape=(None,) + img_size)
@@ -43,25 +43,33 @@ model_stacked.compile(loss='mean_squared_error',
                       optimizer=SGD(lr=learning_rate, momentum=0.9),
                       metrics=[])   # loss = Euclidean distance
 
-with Timer("load pano images"):
-    image_array, label_array = load_data()
-nb_sample_image = image_array.shape[0]
-nb_sample_smallset = 2000
-rand_sample_index = np.random.choice(nb_sample_image, nb_sample_smallset, replace = False)
-image_array = image_array[rand_sample_index, :, :, :]
-label_array = label_array[rand_sample_index, :]
+
+# nb_sample_image = image_array.shape[0]
+# nb_sample_smallset = 2000
+# rand_sample_index = np.random.choice(nb_sample_image, nb_sample_smallset, replace = False)
+# image_array = image_array[rand_sample_index, :, :, :]
+# label_array = label_array[rand_sample_index, :]
 
 
 # train data
-batch_size = 32
-nb_epoch = 100
+batch_size = 32     # determine the generator batch size
+nb_epoch = 10
+nb_train_sample = 5000
 
-history_callback = model_stacked.fit(image_array, label_array,
-                                     batch_size=batch_size,
-                                     nb_epoch=nb_epoch,
-                                     validation_split=0.0,
-                                     validation_data=None,
-                                     shuffle=True)
+datagen_train = ImageDataGenerator(rescale=1./255, featurewise_center=True)     # set input mean to 0 over dataset
+generator_train = datagen_train.flow_from_directory('datasets/train_test_split/test',
+                                                    target_size=(img_height, img_width),    # order checked
+                                                    batch_size=batch_size,
+                                                    shuffle=True,
+                                                    class_mode=None)    # possible name: 'xy_pos'
+
+
+loss_rtplot = LossRTPlot()
+history_callback = model_stacked.fit_generator(generator_train,
+                                               samples_per_epoch=nb_train_sample,
+                                               nb_epoch=nb_epoch,
+                                               validation_data=[],
+                                               callbacks=[loss_rtplot])
 
 # record the loss
 record = np.column_stack((np.array(history_callback.epoch) + 1, history_callback.history['loss']))
