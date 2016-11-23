@@ -6,10 +6,9 @@ from keras.preprocessing.image import img_to_array
 from keras.applications import vgg16
 
 
-# TODO remember to let testing data to go through the same preprocessing
-# e.g. dim switch, median reduction
+# CPU and mem were overwhelmed if load them all at once
 def load_data():
-    dirname_image = 'datasets/srcb_routeP1-3-10-14_panoimage/'      # 75912 images
+    dirname_image = 'datasets/srcb_routeP1-3-10-14_panoimage/'      # 75910 images
     dirname_label = 'datasets/srcb_routeP1-3-10-14_label/'
     label_filename = 'label_list.csv'
     # load labels
