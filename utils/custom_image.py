@@ -299,6 +299,8 @@ class ImageDataGenerator(object):
 
         if self.featurewise_center:
             x -= self.mean
+        # note: lazy behavior to directly substract 128
+        x -= 128
         if self.featurewise_std_normalization:
             x /= (self.std + 1e-7)
 
@@ -434,9 +436,9 @@ class Iterator(object):
             if seed is not None:
                 np.random.seed(seed + self.total_batches_seen)
             if self.batch_index == 0:
-                index_array = np.arange(N)
+                index_array = np.arange(N)                  # order without shuffle
                 if shuffle:
-                    index_array = np.random.permutation(N)
+                    index_array = np.random.permutation(N)  # new order
 
             current_index = (self.batch_index * batch_size) % N
             if N >= current_index + batch_size:
@@ -536,10 +538,11 @@ class DirectoryIterator(Iterator):
             else:
                 self.image_shape = (1,) + self.target_size
         self.classes = classes
-        if class_mode not in {'categorical', 'binary', 'sparse', None}:
+        # add one more class_mode 'xy_pos'
+        if class_mode not in {'categorical', 'binary', 'sparse', 'xy_pos', None}:
             raise ValueError('Invalid class_mode:', class_mode,
                              '; expected one of "categorical", '
-                             '"binary", "sparse", or None.')
+                             '"binary", "sparse", "xy_pos", or None.')
         self.class_mode = class_mode
         self.save_to_dir = save_to_dir
         self.save_prefix = save_prefix
@@ -552,41 +555,83 @@ class DirectoryIterator(Iterator):
 
         if not classes:
             classes = []
-            for subdir in sorted(os.listdir(directory)):
-                if os.path.isdir(os.path.join(directory, subdir)):
-                    classes.append(subdir)
+            if class_mode == 'xy_pos':
+                # set each file as one class
+                for filename in sorted(os.listdir(directory)):
+                    if os.path.isfile(os.path.join(directory, filename)):
+                        classes.append(filename)
+            else:
+                for subdir in sorted(os.listdir(directory)):
+                    if os.path.isdir(os.path.join(directory, subdir)):
+                        classes.append(subdir)
         self.nb_class = len(classes)
         self.class_indices = dict(zip(classes, range(len(classes))))
 
-        for subdir in classes:
-            subpath = os.path.join(directory, subdir)
-            for fname in sorted(os.listdir(subpath)):
+        # check file name validity
+        if class_mode == 'xy_pos':
+            for filename in classes:
                 is_valid = False
                 for extension in white_list_formats:
-                    if fname.lower().endswith('.' + extension):
+                    if filename.lower().endswith('.' + extension):
                         is_valid = True
                         break
                 if is_valid:
                     self.nb_sample += 1
-        print('Found %d images belonging to %d classes.' % (self.nb_sample, self.nb_class))
+            print('Found %d images belonging to %d classes.' % (self.nb_sample, self.nb_class))
 
-        # second, build an index of the images in the different class subfolders
-        self.filenames = []
-        self.classes = np.zeros((self.nb_sample,), dtype='int32')
-        i = 0
-        for subdir in classes:
-            subpath = os.path.join(directory, subdir)
-            for fname in sorted(os.listdir(subpath)):
+            # second, build an index of the images in one img folder
+            self.filenames = []     # same with self.classes in this case
+            self.classes = np.zeros((self.nb_sample,), dtype='int32')   # np.arange(
+            i = 0
+            for filename in classes:
                 is_valid = False
                 for extension in white_list_formats:
-                    if fname.lower().endswith('.' + extension):
+                    if filename.lower().endswith('.' + extension):
                         is_valid = True
                         break
                 if is_valid:
-                    self.classes[i] = self.class_indices[subdir]
-                    self.filenames.append(os.path.join(subdir, fname))
+                    self.classes[i] = self.class_indices[filename]
+                    self.filenames.append(filename)
                     i += 1
-        super(DirectoryIterator, self).__init__(self.nb_sample, batch_size, shuffle, seed)
+            # prepare labels for x,y position
+            self.img_pos_set = np.zeros((self.nb_class, 2), dtype='float32')
+            label_file_name = "../test_label.csv"  # TODO make it flexible
+            with open(directory+'/'+label_file_name, 'r') as label_file:
+                lines = label_file.readlines()
+            assert len(lines) == self.nb_class, 'lines in label file != number of classes'
+            for index, line in enumerate(lines):
+                self.img_pos_set[index, :] = np.array(line.split(','))
+            super(DirectoryIterator, self).__init__(self.nb_sample, batch_size, shuffle, seed)
+        else:
+            for subdir in classes:
+                subpath = os.path.join(directory, subdir)
+                for fname in sorted(os.listdir(subpath)):
+                    is_valid = False
+                    for extension in white_list_formats:
+                        if fname.lower().endswith('.' + extension):
+                            is_valid = True
+                            break
+                    if is_valid:
+                        self.nb_sample += 1
+            print('Found %d images belonging to %d classes.' % (self.nb_sample, self.nb_class))
+
+            # second, build an index of the images in the different class subfolders
+            self.filenames = []
+            self.classes = np.zeros((self.nb_sample,), dtype='int32')
+            i = 0
+            for subdir in classes:
+                subpath = os.path.join(directory, subdir)
+                for fname in sorted(os.listdir(subpath)):
+                    is_valid = False
+                    for extension in white_list_formats:
+                        if fname.lower().endswith('.' + extension):
+                            is_valid = True
+                            break
+                    if is_valid:
+                        self.classes[i] = self.class_indices[subdir]
+                        self.filenames.append(os.path.join(subdir, fname))
+                        i += 1
+            super(DirectoryIterator, self).__init__(self.nb_sample, batch_size, shuffle, seed)
 
     def next(self):
         with self.lock:
@@ -619,7 +664,11 @@ class DirectoryIterator(Iterator):
         elif self.class_mode == 'categorical':
             batch_y = np.zeros((len(batch_x), self.nb_class), dtype='float32')
             for i, label in enumerate(self.classes[index_array]):
-                batch_y[i, label] = 1.
+                batch_y[i, label] = 1.  # activate current class index position
+        elif self.class_mode == 'xy_pos':
+            batch_y = np.zeros((len(batch_x), 2), dtype='float32')
+            for i, pos in enumerate(self.img_pos_set[index_array,:]):
+                batch_y[i, :] = pos
         else:
             return batch_x
         return batch_x, batch_y

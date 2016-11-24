@@ -13,7 +13,7 @@ from utils.loss_acc_history_rtplot import LossRTPlot
 
 img_width = 224*4   # 896 in the horizontal direction
 img_height = 224
-img_size = (3, img_width, img_height)
+img_size = (3, img_height, img_width)   # expected: shape (nb_sample, 3, 224, 896)
 input_tensor = Input(batch_shape=(None,) + img_size)
 
 model_vgg_places_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
@@ -52,16 +52,18 @@ model_stacked.compile(loss='mean_squared_error',
 
 
 # train data
-batch_size = 32     # determine the generator batch size
-nb_epoch = 10
+batch_size = 16     # determine the generator batch size
+nb_epoch = 100
 nb_train_sample = 5000
 
-datagen_train = ImageDataGenerator(rescale=1./255, featurewise_center=True)     # set input mean to 0 over dataset
-generator_train = datagen_train.flow_from_directory('datasets/train_test_split/test',
+# # setting input mean to 0 over dataset, not applicable to fit_generator due to difficulty to get the whole set
+# datagen_train = ImageDataGenerator(rescale=1./255, featurewise_center=True)
+datagen_train = ImageDataGenerator(rescale=1./255)
+generator_train = datagen_train.flow_from_directory('datasets/train_test_split/test/',
                                                     target_size=(img_height, img_width),    # order checked
                                                     batch_size=batch_size,
                                                     shuffle=True,
-                                                    class_mode=None)    # possible name: 'xy_pos'
+                                                    class_mode='xy_pos')    # possible name: 'xy_pos'
 
 
 loss_rtplot = LossRTPlot()
@@ -69,6 +71,7 @@ history_callback = model_stacked.fit_generator(generator_train,
                                                samples_per_epoch=nb_train_sample,
                                                nb_epoch=nb_epoch,
                                                validation_data=[],
+                                               # callbacks=[])
                                                callbacks=[loss_rtplot])
 
 # record the loss
