@@ -17,28 +17,14 @@ class ConvergencePlot():
             epoch_convergence_array = np.zeros((self.nb_total_epoch, 4), dtype='float32')
             for index, line in enumerate(lines):
                 items = line.split(',')
-                epoch_convergence_array[index, :] = np.array(items[1:])     # discard epoch index
+                # fill the rest with 0's if items length < 5 (1 index + 4 values)
+                item_array = np.append(np.array(items[1:]),     # cut epoch index off
+                                       np.zeros(4-items.__len__()+1, dtype='float32'))
+                epoch_convergence_array[index, :] = item_array
             column_list = ['train_loss', 'train_acc', 'valid_loss', 'valid_acc']
             self.epoch_convergence_df = pd.DataFrame(epoch_convergence_array, columns=column_list)
-        elif filetype == 'txt':
-            with open(filename, 'r') as epoch_file:
-                lines = epoch_file.readlines()[nb_line_skipped:]
-                lines = lines[1::2]  # skip line intermittently
-            self.nb_total_epoch = lines.__len__()
-            epoch_convergence_array = np.zeros((self.nb_total_epoch, 5), dtype='float32')
-            for index, line in enumerate(lines):
-                items = line.split(' ')
-                select_items = items[3::3]
-                select_items[0] = select_items[0].rstrip(string.ascii_letters)  # delete 'sec'
-                select_items[4] = select_items[4].rstrip(string.whitespace)  # delete '\n'
-                select_items_in_float = [float(item) for item in select_items]
-                epoch_convergence_array[index, :] = select_items_in_float
-            column_list = ['time_in_sec', 'train_loss', 'train_acc', 'valid_loss', 'valid_acc']
-            self.epoch_convergence_df = pd.DataFrame(epoch_convergence_array, columns=column_list)
-        else:
+        else:   # txt file will not be supported
             print 'wrong file name extension'
-
-
 
     def plt_train_valid_loss(self, nb_epoch=None, save=False):
         if nb_epoch == None:
@@ -103,71 +89,18 @@ class ConvergencePlot():
             raw_input()
 
 if __name__ == '__main__':
-    # path_name = 'pretrain/training_procedure/'
-    # file_name_1e3 = 'convergence_vgg2fc512_places_fineT_11fzlayer_25epoch_sgdlr1e-3_2class_HomeOrOff_model.csv'
-    # file_name_1e4 = 'convergence_vgg2fc512_places_fineT_11fzlayer_50epoch_sgdlr1e-4_2class_HomeOrOff_model.csv'
-    # file_name_1e5 = 'convergence_vgg2fc512_places_fineT_11fzlayer_50epoch_sgdlr1e-5_2class_HomeOrOff_model.csv'
-    # file_name_1e6 = 'convergence_vgg2fc512_places_fineT_11fzlayer_100epoch_sgdlr1e-6_2class_HomeOrOff_model.csv'
-    #
-    # test_plot_1e3 = ConvergencePlot(filename=path_name+file_name_1e3)
-    # test_plot_1e4 = ConvergencePlot(filename=path_name+file_name_1e4)
-    # test_plot_1e5 = ConvergencePlot(filename=path_name+file_name_1e5)
-    # test_plot_1e6 = ConvergencePlot(filename=path_name+file_name_1e6)
-
-    # plt.figure()
-    # plt.plot(np.arange(test_plot_1e3.nb_total_epoch)+1, test_plot_1e3.epoch_convergence_df['train_loss'])
-    # plt.plot(np.arange(test_plot_1e4.nb_total_epoch)+1, test_plot_1e4.epoch_convergence_df['train_loss'])
-    # plt.plot(np.arange(test_plot_1e5.nb_total_epoch)+1, test_plot_1e5.epoch_convergence_df['train_loss'])
-    # plt.plot(np.arange(test_plot_1e6.nb_total_epoch)+1, test_plot_1e6.epoch_convergence_df['train_loss'])
-    # plt.xlim([1, 100])
-    # plt.xlabel('epoch')
-    # plt.ylabel('loss')
-    # plt.legend(['1e-3', '1e-4', '1e-5', '1e-6'], loc='upper right')
-    # plt.show()
-    # raw_input()
-
-    # plt.figure()
-    # plt.plot(np.arange(test_plot_1e5.nb_total_epoch)+1, test_plot_1e5.epoch_convergence_df['train_acc'])
-    # plt.plot(np.arange(test_plot_1e5.nb_total_epoch)+1, test_plot_1e5.epoch_convergence_df['valid_acc'])
-    # plt.xlim([1, test_plot_1e5.nb_total_epoch+1])
-    # plt.xlabel('epoch')
-    # plt.ylabel('acc')
-    # plt.legend(['train_acc', 'valid_acc'], loc='upper left')
-    # plt.title('accuracy lr=1e-5')
-    # plt.show()
-    # raw_input()
-
-    # plt.figure()
-    # plt.plot(np.arange(test_plot_1e6.nb_total_epoch) + 1, test_plot_1e6.epoch_convergence_df['train_loss'])
-    # plt.plot(np.arange(test_plot_1e6.nb_total_epoch) + 1, test_plot_1e6.epoch_convergence_df['valid_loss'])
-    # plt.xlim([1, test_plot_1e6.nb_total_epoch + 1])
-    # plt.xlabel('epoch')
-    # plt.ylabel('loss')
-    # plt.legend(['train_loss', 'valid_loss'], loc='upper right')
-    # plt.title('loss function with lr=1e-6')
-    # plt.show()
-    # raw_input()
-
-    path_name = 'pretrain/training_procedure/'
-    file_name_difflr = 'convergence_vgg2fc512_places_100epoch_sgdlr1e-5m50_2class_HomeOrOff_model.csv'
-    test_plot_difflr = ConvergencePlot(filename=path_name + file_name_difflr)
-    # plt.figure()
-    # plt.plot(np.arange(test_plot_difflr.nb_total_epoch) + 1, test_plot_difflr.epoch_convergence_df['train_loss'])
-    # plt.plot(np.arange(test_plot_difflr.nb_total_epoch) + 1, test_plot_difflr.epoch_convergence_df['valid_loss'])
-    # plt.xlim([1, test_plot_difflr.nb_total_epoch + 1])
-    # plt.xlabel('epoch')
-    # plt.ylabel('loss')
-    # plt.legend(['train_loss', 'valid_loss'], loc='upper right')
-    # plt.title('loss function with lr=1e-5 lr_m=50.0')
-    # plt.show()
-    # raw_input()
+    path_name = 'relocation/training_procedure/'
+    file_name_smallset_2fc = 'convergence_smallset_vgg2fc1024_places_60epoch_sgdlr1e-05m50_reloc_model.csv'
+    test_plot_smallset_2fc = ConvergencePlot(filename=path_name + file_name_smallset_2fc)
+    file_name_smallset_3fc = 'convergence_smallset_vgg3fc1024_places_100epoch_sgdlr1e-05m50_reloc_model.csv'
+    test_plot_smallset_3fc = ConvergencePlot(filename=path_name + file_name_smallset_3fc)
     plt.figure()
-    plt.plot(np.arange(test_plot_difflr.nb_total_epoch) + 1, test_plot_difflr.epoch_convergence_df['train_acc'])
-    plt.plot(np.arange(test_plot_difflr.nb_total_epoch) + 1, test_plot_difflr.epoch_convergence_df['valid_acc'])
-    plt.xlim([1, test_plot_difflr.nb_total_epoch + 1])
+    plt.plot(np.arange(test_plot_smallset_2fc.nb_total_epoch) + 1, test_plot_smallset_2fc.epoch_convergence_df['train_loss'])
+    plt.plot(np.arange(test_plot_smallset_3fc.nb_total_epoch) + 1, test_plot_smallset_3fc.epoch_convergence_df['train_loss'])
+    plt.xlim([1, max(test_plot_smallset_2fc.nb_total_epoch, test_plot_smallset_3fc.nb_total_epoch) + 1])
     plt.xlabel('epoch')
-    plt.ylabel('accuracy')
-    plt.legend(['train_acc', 'valid_acc'], loc='lower right')
-    plt.title('accuracy with lr=1e-5 lr_m=50.0')
+    plt.ylabel('train loss')
+    plt.legend(['2fc w Dropout 0.5', '3fc w Dropout 0.5'], loc='upper right')
+    plt.title('relocation for smallset 5000 images')
     plt.show()
     raw_input()

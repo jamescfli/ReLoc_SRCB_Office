@@ -278,14 +278,16 @@ class ImageDataGenerator(object):
                             target_size=(256, 256), color_mode='rgb',
                             classes=None, class_mode='categorical',
                             batch_size=32, shuffle=True, seed=None,
-                            save_to_dir=None, save_prefix='', save_format='jpeg'):
+                            save_to_dir=None, save_prefix='', save_format='jpeg',
+                            label_file=None):
         return DirectoryIterator(
             directory, self,
             target_size=target_size, color_mode=color_mode,
             classes=classes, class_mode=class_mode,
             dim_ordering=self.dim_ordering,
             batch_size=batch_size, shuffle=shuffle, seed=seed,
-            save_to_dir=save_to_dir, save_prefix=save_prefix, save_format=save_format)
+            save_to_dir=save_to_dir, save_prefix=save_prefix, save_format=save_format,
+            label_file= label_file)
 
     def standardize(self, x):
         if self.rescale:
@@ -516,7 +518,8 @@ class DirectoryIterator(Iterator):
                  dim_ordering='default',
                  classes=None, class_mode='categorical',
                  batch_size=32, shuffle=True, seed=None,
-                 save_to_dir=None, save_prefix='', save_format='jpeg'):
+                 save_to_dir=None, save_prefix='', save_format='jpeg',
+                 label_file=None):
         if dim_ordering == 'default':
             dim_ordering = K.image_dim_ordering()
         self.directory = directory
@@ -595,7 +598,7 @@ class DirectoryIterator(Iterator):
                     i += 1
             # prepare labels for x,y position
             self.img_pos_set = np.zeros((self.nb_class, 2), dtype='float32')
-            label_file_name = "../test_label.csv"  # TODO make it flexible
+            label_file_name = label_file    # passed from flow_from_directory()
             with open(directory+'/'+label_file_name, 'r') as label_file:
                 lines = label_file.readlines()
             assert len(lines) == self.nb_class, 'lines in label file != number of classes'

@@ -4,7 +4,8 @@ import numpy as np
 from shutil import copyfile
 
 
-# run this .py only once to generate train and test images and put them in diff directories
+# run this .py only once to generate train and test images (with label files)
+# and put them in different folders
 def load_labels(label_filename):
     with open(label_filename, 'r') as label_file:
         lines = label_file.readlines()
@@ -17,12 +18,12 @@ def load_labels(label_filename):
         label_array[index, :] = np.array(items[1:])     # cut the image name
     return image_filename_list, label_array
 
-dirname_label = 'datasets/srcb_routeP1-3-10-14_label/'
+dirname_label = 'datasets/srcb_routeP1-3-10-14_480x1920/'
 label_filename = 'label_list.csv'
 # load labels
 image_filename_list, label_array = load_labels(dirname_label+label_filename)
-nb_total_image_set = 75910
-nb_test_image_set = 5000    # out of 75910 images, rest 70910 for the training
+nb_total_image_set = 15182
+nb_test_image_set = 2000    # out of 15182 images, rest 13182 for the training
 nb_train_image_set = nb_total_image_set - nb_test_image_set
 
 rand_sample_index = np.random.choice(nb_total_image_set, nb_test_image_set, replace=False)
@@ -33,12 +34,12 @@ train_label_list = []
 test_label_list = []
 for i in np.arange(nb_total_image_set):
     if mask_for_test[i]:    # test image
-        copyfile('datasets/srcb_routeP1-3-10-14_panoimage/'+image_filename_list[i],
-                 'datasets/train_test_split/test/'+image_filename_list[i])
+        copyfile('datasets/srcb_routeP1-3-10-14_480x1920/'+image_filename_list[i],
+                 'datasets/train_test_split_480x1920/test/'+image_filename_list[i])
         test_label_list.append(label_array[i,:])
     else:                   # train image
-        copyfile('datasets/srcb_routeP1-3-10-14_panoimage/' + image_filename_list[i],
-                 'datasets/train_test_split/train/' + image_filename_list[i])
+        copyfile('datasets/srcb_routeP1-3-10-14_480x1920/' + image_filename_list[i],
+                 'datasets/train_test_split_480x1920/train/' + image_filename_list[i])
         train_label_list.append(label_array[i,:])
 train_label_array = np.array(train_label_list)
 test_label_array = np.array(test_label_list)
@@ -46,5 +47,5 @@ print 'train label shape: ' + str(train_label_array.shape)
 print 'test label shape: ' + str(test_label_array.shape)
 
 # save to csv file
-np.savetxt('datasets/train_test_split/train_label.csv', train_label_array, delimiter=',')
-np.savetxt('datasets/train_test_split/test_label.csv', test_label_array, delimiter=',')
+np.savetxt('datasets/train_test_split_480x1920/train_label.csv', train_label_array, delimiter=',')
+np.savetxt('datasets/train_test_split_480x1920/test_label.csv', test_label_array, delimiter=',')
