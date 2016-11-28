@@ -43,14 +43,15 @@ model = KerasRegressor(build_fn=create_model,
                        batch_size=batch_size,
                        verbose=2)   # valid if n_jobs=1, more positive more detail
 search_grid_dropout_ratio = [0.2, 0.5, 0.8]
-search_grid_weight_constraint = [1, 3, 5]
+search_grid_weight_constraint = [1, 2, 3, 4, 5]
 search_grid_nb_hidden_node = [256, 512, 1024, 2048, 4096]   # limited by GPU mem
 # # measure unit time consumption
 # search_grid_dropout_ratio = [0.5]
 # search_grid_nb_hidden_node = [4096]
 param_grid = dict(dropout_ratio=search_grid_dropout_ratio,
+                  weight_constraint=search_grid_weight_constraint,
                   nb_hidden_node = search_grid_nb_hidden_node)
-grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=1)
+grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=1)  # -1 has GPU mem issue
 with Timer('train one grid'):   # 50% DO + fc4096: 1177sec => 36 test in ~<11.77 hours
     grid_result = grid.fit(train_data, train_label)
 
