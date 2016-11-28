@@ -41,7 +41,7 @@ base_model_output = Dropout(0.5)(base_model_output)
 preds = Dense(2,
               W_learning_rate_multiplier=learning_rate_multiplier,
               b_learning_rate_multiplier=learning_rate_multiplier,
-              activation='softmax')(base_model_output)
+              activation='linear')(base_model_output)
 model_stacked = Model(model_vgg_places_notop.input, preds)
 
 # no frozen layer
@@ -54,18 +54,18 @@ model_stacked.compile(loss='mean_squared_error',
 
 # train data
 batch_size = 3     # determine the generator batch size
-nb_epoch = 100
+nb_epoch = 10
 nb_train_sample = 5000
 
 # # setting input mean to 0 over dataset, not applicable to fit_generator due to difficulty to get the whole set
 # datagen_train = ImageDataGenerator(rescale=1./255, featurewise_center=True)
 datagen_train = ImageDataGenerator(rescale=1./255)
-generator_train = datagen_train.flow_from_directory('datasets/train_test_split_480x1920/test/',
+generator_train = datagen_train.flow_from_directory('datasets/train_test_split_480x1920/test/test_subdir/',
                                                     target_size=(img_height, img_width),    # order checked
                                                     batch_size=batch_size,
                                                     shuffle=True,
                                                     class_mode='xy_pos',    # possible name: 'xy_pos'
-                                                    label_file="../test_label.csv")
+                                                    label_file="../../test_label.csv")
 
 
 loss_rtplot = LossRTPlot()

@@ -301,8 +301,9 @@ class ImageDataGenerator(object):
 
         if self.featurewise_center:
             x -= self.mean
-        # note: lazy behavior to directly substract 128
-        x -= 128
+        # # check, x goes btw [0,1]
+        # print('x description: {}, {}, {}'.format(x.mean(), x.max(), x.min()))
+        x -= 0.5    # regularize x to [-0.5,+0.5] suggested by LYan
         if self.featurewise_std_normalization:
             x /= (self.std + 1e-7)
 
@@ -597,13 +598,9 @@ class DirectoryIterator(Iterator):
                     self.filenames.append(filename)
                     i += 1
             # prepare labels for x,y position
-            self.img_pos_set = np.zeros((self.nb_class, 2), dtype='float32')
             label_file_name = label_file    # passed from flow_from_directory()
-            with open(directory+'/'+label_file_name, 'r') as label_file:
-                lines = label_file.readlines()
-            assert len(lines) == self.nb_class, 'lines in label file != number of classes'
-            for index, line in enumerate(lines):
-                self.img_pos_set[index, :] = np.array(line.split(','))
+            self.img_pos_set = np.loadtxt(directory+'/'+label_file_name, dtype='float32', delimiter=',')
+            assert self.img_pos_set.shape[0] == self.nb_class, 'lines in label file != number of classes'
             super(DirectoryIterator, self).__init__(self.nb_sample, batch_size, shuffle, seed)
         else:
             for subdir in classes:
