@@ -17,7 +17,7 @@ assert train_data.shape[0] == train_label.shape[0], 'nb of data samples != nb of
 print('training data shape: {}'.format(train_data.shape))
 print('training label shape: {}'.format(train_label.shape))
 
-def create_model(dropout_ratio=0.0, weight_constraint=0, nb_hidden_node=4096):
+def create_model(dropout_ratio=0.5, weight_constraint=2, nb_hidden_node=256):
     model = Sequential()
     model.add(Dense(nb_hidden_node,
                     activation='relu',
@@ -41,10 +41,10 @@ np.random.seed(seed)
 model = KerasRegressor(build_fn=create_model,
                        nb_epoch=nb_epoch,
                        batch_size=batch_size,
-                       verbose=2)   # valid if n_jobs=1, more positive more detail
-search_grid_dropout_ratio = [0.2, 0.5, 0.8]
-search_grid_weight_constraint = [1, 2, 3, 4, 5]
-search_grid_nb_hidden_node = [256, 512, 1024, 2048, 4096]   # limited by GPU mem
+                       verbose=1)   # valid if n_jobs=1, info 1 > 2 > 3 > 0
+search_grid_dropout_ratio = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+search_grid_weight_constraint = [1, 2]
+search_grid_nb_hidden_node = [1024]   # limited by GPU mem
 # # measure unit time consumption
 # search_grid_dropout_ratio = [0.5]
 # search_grid_nb_hidden_node = [4096]
@@ -65,5 +65,12 @@ for mean, stdev, param in zip(means, stds, params):
 
 
 # # time estimation through single model test
-# model = create_model(dropout_ratio=0.9, nb_hidden_node=4096)   # options are 256, 512, 1024, 2048, 4096
+# nb_hidden_node = 256
+# dropout_ratio = 0.5
+# weight_constraint = 2
+# model = create_model(dropout_ratio=dropout_ratio,
+#                      weight_constraint=weight_constraint,
+#                      nb_hidden_node=nb_hidden_node)
 # model.fit(train_data, train_label, batch_size=batch_size, nb_epoch=nb_epoch, shuffle=True, verbose=1)
+# # model.save_weights('models/train_topfc{}_smallset_{}epoch_DO{}_WC{}_reloc_model.h5'
+# #                    .format(nb_hidden_node, nb_epoch, dropout_ratio, weight_constraint))
