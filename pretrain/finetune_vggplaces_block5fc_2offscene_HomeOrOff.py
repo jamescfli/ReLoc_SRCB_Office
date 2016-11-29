@@ -62,7 +62,6 @@ datagen_test = ImageDataGenerator(rescale=1./255)
 generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/test',
                                                   target_size=(img_height,img_width),
                                                   batch_size=batch_size,
-                                                  shuffle=True,   # default is True
                                                   class_mode='categorical')
 
 # train 50 first to check the consistence btw loss and val_loss, try different lr's
