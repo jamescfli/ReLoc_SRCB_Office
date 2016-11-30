@@ -18,7 +18,8 @@ def load_labels(label_filename):
         label_array[index, :] = np.array(items[1:])     # cut the image name
     return image_filename_list, label_array
 
-dirname_label = 'datasets/srcb_routeP1-3-10-14_480x1920/'
+# data without augmentation
+dirname_label = 'datasets/srcb_routeP1-3-10-14_480x1920/'   # 15182 + 1 label file
 label_filename = 'label_list.csv'
 # load labels
 image_filename_list, label_array = load_labels(dirname_label+label_filename)
@@ -26,20 +27,23 @@ nb_total_image_set = 15182
 nb_test_image_set = 2000    # out of 15182 images, rest 13182 for the training
 nb_train_image_set = nb_total_image_set - nb_test_image_set
 
+seed = 7    # same splitting random seed for verification
+np.random.seed(seed)
+
 rand_sample_index = np.random.choice(nb_total_image_set, nb_test_image_set, replace=False)
-mask_for_test = np.zeros(nb_total_image_set, dtype=bool)
-mask_for_test[rand_sample_index] = True
+mask_for_test = np.zeros(nb_total_image_set, dtype=bool)    # all False
+mask_for_test[rand_sample_index] = True                     # select test set index
 
 train_label_list = []
 test_label_list = []
 for i in np.arange(nb_total_image_set):
     if mask_for_test[i]:    # test image
         copyfile('datasets/srcb_routeP1-3-10-14_480x1920/'+image_filename_list[i],
-                 'datasets/train_test_split_480x1920/test/'+image_filename_list[i])
+                 'datasets/train_test_split_480x1920/test/test_subdir'+image_filename_list[i])
         test_label_list.append(label_array[i,:])
     else:                   # train image
         copyfile('datasets/srcb_routeP1-3-10-14_480x1920/' + image_filename_list[i],
-                 'datasets/train_test_split_480x1920/train/' + image_filename_list[i])
+                 'datasets/train_test_split_480x1920/train/train_subdir' + image_filename_list[i])
         train_label_list.append(label_array[i,:])
 train_label_array = np.array(train_label_list)
 test_label_array = np.array(test_label_list)
