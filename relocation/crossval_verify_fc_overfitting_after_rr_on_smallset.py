@@ -8,6 +8,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import GridSearchCV
 
 import numpy as np
+from utils.loss_acc_history_rtplot import LossRTPlot
 from utils.timer import Timer
 
 img_height = 448  # options: 448, 224, original 450*1920
@@ -15,7 +16,10 @@ img_width = img_height * 4
 
 train_data = np.load(open('bottleneck_data/bottleneck_feature_vggrr_smallset_{}x{}.npy'
                           .format(img_height, img_width)))
-train_label = np.loadtxt('datasets/train_test_split_480x1920/test_label.csv',
+# apply x100 label values
+label_scaling_factor = 100
+train_label = np.loadtxt('datasets/train_test_split_480x1920/test_label_x{}.csv'
+                         .format(label_scaling_factor),
                          dtype='float32', delimiter=',')
 
 assert train_data.shape[0] == train_label.shape[0], 'nb of data samples != nb of labels'
@@ -40,7 +44,7 @@ def create_model(dropout_ratio=0.5, weight_constraint=2, nb_hidden_node=256):
     model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=[])
     return model
 
-nb_epoch = 100
+nb_epoch = 500
 batch_size = 16
 
 seed = 7
@@ -79,6 +83,17 @@ weight_constraint = 2
 model = create_model(dropout_ratio=dropout_ratio,
                      weight_constraint=weight_constraint,
                      nb_hidden_node=nb_hidden_node)
-model.fit(train_data, train_label, batch_size=batch_size, nb_epoch=nb_epoch, shuffle=True, verbose=1)
-model.save_weights('models/train_input{}_topfc{}_smallset_{}epoch_DO{}_WC{}_reloc_model.h5'
-                   .format(img_height, nb_hidden_node, nb_epoch, dropout_ratio, weight_constraint))
+lossRTplot = LossRTPlot()
+model.fit(train_data, train_label,
+          batch_size=batch_size,
+          nb_epoch=nb_epoch,
+          shuffle=True,
+          verbose=1,
+          callbacks=[lossRTplot])
+model.save_weights('models/train_input{}_topfc{}_smallset_ls{}_{}epoch_DO{}_WC{}_reloc_model.h5'
+                   .format(img_height,
+                           nb_hidden_node,
+                           label_scaling_factor,    # ls - label scalar
+                           nb_epoch,
+                           dropout_ratio,
+                           weight_constraint))

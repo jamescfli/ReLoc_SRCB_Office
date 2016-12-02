@@ -51,5 +51,5 @@ print 'train label shape: ' + str(train_label_array.shape)
 print 'test label shape: ' + str(test_label_array.shape)
 
 # save to csv file
-np.savetxt('datasets/train_test_split_480x1920/train_label.csv', train_label_array, delimiter=',')
-np.savetxt('datasets/train_test_split_480x1920/test_label.csv', test_label_array, delimiter=',')
+np.savetxt('datasets/train_test_split_480x1920/train_label_x1.csv', train_label_array, delimiter=',')
+np.savetxt('datasets/train_test_split_480x1920/test_label_x1.csv', test_label_array, delimiter=',')
