@@ -5,6 +5,7 @@ from keras.layers import Input, MaxPooling2D, Flatten, Dense, Dropout
 from keras.constraints import maxnorm
 from keras.applications import vgg16
 from keras.optimizers import SGD
+from keras.models import model_from_json
 
 from utils.custom_image import ImageDataGenerator
 from utils.loss_acc_history_rtplot import LossRTPlot
@@ -70,61 +71,23 @@ def build_vggrrfc_model(vgg_initial_weights='places',
         layer.trainable = False
 
     vggrr_model.compile(loss='mean_squared_error',
-                        # optimizer=SGD(lr=global_learning_rate, momentum=0.9),
-                        optimizer='adadelta',   # keep apply 'adadelta'
+                        optimizer=SGD(lr=global_learning_rate, momentum=0.9),
+                        # optimizer='adadelta',   # keep apply 'adadelta'
                         metrics=[])
     return vggrr_model      # total 26 layers
 
-def load_vggrrfc_model(nb_fc_hidden_node=1024,
-                       dropout_ratio=0.5,
-                       weight_constraint=2,
-                       nb_frozen_layer=0,
-                       global_learning_rate=1e-5,
-                       learning_rate_multiplier=1.0,
-                       label_scaling_factor=1,
+
+def load_vggrrfc_model(model_structure_path=None,
                        model_weight_path=None):
-    if model_weight_path == None:
-        print 'please provide path to the model weights'
-        return None
-    img_size = (3, img_height, img_width)
-    input_tensor = Input(batch_shape=(None,) + img_size)
-
-    vgg_places_model_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
-    vggrr_model_output = vgg_places_model_notop.output
-    vggrr_model_output = MaxPooling2D(pool_size=(1, (img_height / 32) * 4), strides=None)(vggrr_model_output)
-    vggrr_model_output = Flatten()(vggrr_model_output)
-
-    vggrr_model_output = Dense(nb_fc_hidden_node,
-                               name='FC_Dense_1',
-                               W_constraint=maxnorm(weight_constraint),
-                               W_learning_rate_multiplier=learning_rate_multiplier,
-                               b_learning_rate_multiplier=learning_rate_multiplier,
-                               activation='relu')(vggrr_model_output)
-    vggrr_model_output = Dropout(dropout_ratio)(vggrr_model_output)
-    vggrr_model_output = Dense(nb_fc_hidden_node,
-                               name='FC_Dense_2',
-                               W_constraint=maxnorm(weight_constraint),
-                               W_learning_rate_multiplier=learning_rate_multiplier,
-                               b_learning_rate_multiplier=learning_rate_multiplier,
-                               activation='relu')(vggrr_model_output)
-    vggrr_model_output = Dropout(dropout_ratio)(vggrr_model_output)
-    vggrr_model_output = Dense(2,
-                               name='FC_Dense_3',
-                               W_learning_rate_multiplier=learning_rate_multiplier,
-                               b_learning_rate_multiplier=learning_rate_multiplier,
-                               activation='linear')(vggrr_model_output)
-    vggrr_model = Model(vgg_places_model_notop.input, vggrr_model_output)
-    vggrr_model.load_weights(model_weight_path)
-
-    # set frozen layers
-    for layer in vggrr_model.layers[:nb_frozen_layer]:
-        layer.trainable = False
-
-    vggrr_model.compile(loss='mean_squared_error',
-                        optimizer=SGD(lr=global_learning_rate, momentum=0.9),
-                        # optimizer='adadelta',  # keep apply 'adadelta'
-                        metrics=[])
-    return vggrr_model
+    # load structure
+    json_file = open(model_structure_path, 'r')
+    loaded_model_json = json_file.read()
+    json_file.close()
+    vggrrfc_model = model_from_json(loaded_model_json)
+    # load weights
+    vggrrfc_model.load_weights("model_weight_path")
+    print "load " + model_structure_path + " and " + model_weight_path + " from disk"
+    return vggrrfc_model
 
 
 # build model from scratch
@@ -132,8 +95,8 @@ nb_hidden_node = 1024
 do_ratio = 0.5
 weight_con = 2
 nb_fzlayer = 15         # 11 block4, 15 block5, 19 top fc
-learning_rate = 1e-5            # to conv layers
-lr_multiplier = 1.0    # to top fc layers
+learning_rate = 1e-5    # to conv layers
+lr_multiplier = 1.0     # to top fc layers
 label_scalar = 100      # expend from [0, 1]
 model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
                                     dropout_ratio=do_ratio,
@@ -142,20 +105,15 @@ model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
                                     global_learning_rate=learning_rate,
                                     learning_rate_multiplier=lr_multiplier,
                                     label_scaling_factor=label_scalar)
-# # build model from trained one, TODO better use json to save model structure
-# model_wt_path = 'models/train_vggrr3fc1024_largeset_15fzlayer_ls100_8epoch_sgdlr1e-05m1.0_reloc_model.h5'
-# model_stacked = load_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
-#                                    dropout_ratio=do_ratio,
-#                                    weight_constraint=weight_con,
-#                                    nb_frozen_layer=nb_fzlayer,
-#                                    global_learning_rate=learning_rate,
-#                                    learning_rate_multiplier=lr_multiplier,
-#                                    label_scaling_factor=label_scalar,
+# # build model from trained one
+# model_struct_path = "models/structure..json"
+# model_wt_path = 'models/weights..h5'
+# model_stacked = load_vggrrfc_model(model_structure_path=model_struct_path,
 #                                    model_weight_path=model_wt_path)
 
 
 batch_size = 16     # higher size, e.g. 16, due to less tranable layers
-nb_epoch = 32
+nb_epoch = 50
 # prepare training data
 nb_train_sample = 13182
 
@@ -200,7 +158,17 @@ np.savetxt('training_procedure/convergence_vggrr3fc{}_largeset_{}fzlayer_ls{}_{}
                    learning_rate,
                    int(lr_multiplier)),
            record, delimiter=',')
-model_stacked.save_weights('models/train_vggrr3fc{}_largeset_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_reloc_model.h5'
+model_stacked_json = model_stacked.to_json()
+with open('models/structure_vggrr3fc{}_largeset_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_reloc_model.h5'
+                  .format(nb_hidden_node,
+                          nb_fzlayer,
+                          label_scalar,
+                          (history_callback.epoch[-1]+1),
+                          learning_rate,
+                          lr_multiplier), "w") \
+        as json_file_model_stacked:
+    json_file_model_stacked.write(model_stacked_json)
+model_stacked.save_weights('models/weights_vggrr3fc{}_largeset_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_reloc_model.h5'
                            .format(nb_hidden_node,
                                    nb_fzlayer,
                                    label_scalar,
