@@ -78,7 +78,8 @@ def build_vggrrfc_model(vgg_initial_weights='places',
 
 
 def load_vggrrfc_model(model_structure_path=None,
-                       model_weight_path=None):
+                       model_weight_path=None,
+                       global_learning_rate=1e-05):
     # load structure
     json_file = open(model_structure_path, 'r')
     loaded_model_json = json_file.read()
@@ -87,6 +88,11 @@ def load_vggrrfc_model(model_structure_path=None,
     # load weights
     vggrrfc_model.load_weights("model_weight_path")
     print "load " + model_structure_path + " and " + model_weight_path + " from disk"
+    vggrrfc_model.compile(loss='mean_squared_error',
+                          optimizer=SGD(lr=global_learning_rate, momentum=0.9),
+                          # optimizer='adadelta',   # keep apply 'adadelta'
+                          metrics=[])
+    print 'model compiled'
     return vggrrfc_model
 
 
@@ -109,7 +115,8 @@ model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
 # model_struct_path = "models/structure..json"
 # model_wt_path = 'models/weights..h5'
 # model_stacked = load_vggrrfc_model(model_structure_path=model_struct_path,
-#                                    model_weight_path=model_wt_path)
+#                                    model_weight_path=model_wt_path,
+#                                    global_learning_rate=learning_rate)
 
 
 batch_size = 16     # higher size, e.g. 16, due to less tranable layers
