@@ -72,7 +72,7 @@ def build_vggrrfc_model(vgg_initial_weights='places',
 
     vggrr_model.compile(loss='mean_squared_error',
                         optimizer=SGD(lr=global_learning_rate, momentum=0.9),
-                        # optimizer='adadelta',   # keep apply 'adadelta'
+                        # optimizer='rmsprop',
                         metrics=[])
     return vggrr_model      # total 26 layers
 
@@ -100,9 +100,9 @@ def load_vggrrfc_model(model_structure_path=None,
 nb_hidden_node = 1024
 do_ratio = 0.5
 weight_con = 2
-nb_fzlayer = 15         # 11 block4, 15 block5, 19 top fc
+nb_fzlayer = 11         # 11 block4, 15 block5, 19 top fc
 learning_rate = 1e-5    # to conv layers
-lr_multiplier = 1.0     # to top fc layers
+lr_multiplier = 100.0   # to top fc layers
 label_scalar = 100      # expend from [0, 1]
 model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
                                     dropout_ratio=do_ratio,
@@ -119,8 +119,8 @@ model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
 #                                    global_learning_rate=learning_rate)
 
 
-batch_size = 16     # higher size, e.g. 16, due to less tranable layers
-nb_epoch = 50
+batch_size = 16
+nb_epoch = 100
 # prepare training data
 nb_train_sample = 13182
 
