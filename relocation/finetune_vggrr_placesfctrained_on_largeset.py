@@ -73,7 +73,7 @@ def build_vggrrfc_model(vgg_initial_weights='places',
     vggrr_model.compile(loss='mean_squared_error',
                         optimizer=SGD(lr=global_learning_rate, momentum=0.9),
                         # optimizer='rmsprop',
-                        metrics=[])
+                        metrics=['mean_squared_error'])
     return vggrr_model      # total 26 layers
 
 
@@ -91,7 +91,7 @@ def load_vggrrfc_model(model_structure_path=None,
     vggrrfc_model.compile(loss='mean_squared_error',
                           optimizer=SGD(lr=global_learning_rate, momentum=0.9),
                           # optimizer='adadelta',   # keep apply 'adadelta'
-                          metrics=[])
+                          metrics=['mean_squared_error'])
     print 'model compiled'
     return vggrrfc_model
 

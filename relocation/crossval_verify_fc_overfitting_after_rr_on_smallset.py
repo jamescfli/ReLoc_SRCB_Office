@@ -41,7 +41,7 @@ def create_model(dropout_ratio=0.5, weight_constraint=2, nb_hidden_node=256):
                     W_constraint=maxnorm(weight_constraint)))
     model.add(Dropout(dropout_ratio))
     model.add(Dense(2, name='FC_Dense_3', activation='linear'))
-    model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=[])
+    model.compile(loss='mean_squared_error', optimizer='adadelta', metrics=['mean_squared_error'])
     return model
 
 nb_epoch = 500

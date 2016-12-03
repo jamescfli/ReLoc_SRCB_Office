@@ -42,7 +42,7 @@ def build_vggrr_model():
 
     vggrr_model.compile(loss='mean_squared_error',
                         optimizer='RMSprop',
-                        metrics=[])
+                        metrics=['mean_squared_error'])
     return vggrr_model
 
 batch_size = 8  # 8 if feed-forward only, 4 if with back-prop
