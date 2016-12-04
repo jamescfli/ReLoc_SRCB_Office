@@ -35,7 +35,31 @@ def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
     model_vgg_places365_notop.layers[2].set_weights(model.layers[5].get_weights())
     # 06 relu1_2 (Activation)             (None, 64, 224, 224)  0           conv1_2[0][0]
     # 07 pool1 (MaxPooling2D)             (None, 64, 112, 112)  0           relu1_2[0][0]
-    model_vgg_places365_notop.layers[3].get_weights()
+    model_vgg_places365_notop.layers[3].set_weights(model.layers[7].get_weights())
+    # .. Issue:
+    # ..    UserWarning: DEPRECATION: the 'ds' parameter is not going to exist anymore as it is going to be
+    # ..    replaced by the parameter 'ws'.
+    # .. Reason @ pool layer:
+    # # https://github.com/Theano/Theano/blob/master/theano/tensor/signal/pool.py
+    # # check for deprecated parameter names
+    # if ds is not None:
+    #     if ws is not None:
+    #         raise ValueError(
+    #             "You can't provide a tuple value to both 'ws' and 'ds'."
+    #             " Please provide a value only to 'ws'."
+    #         )
+    #     else:
+    #         warnings.warn(
+    #             "DEPRECATION: the 'ds' parameter is not going to exist"
+    #             " anymore as it is going to be replaced by the parameter"
+    #             " 'ws'.",
+    #             stacklevel=2
+    #         )
+    #         ws = ds
+    # elif ds is None and ws is None:
+    #     raise ValueError(
+    #         "You must provide a tuple value for the window size."
+    #     )
 
     # 08 conv2_1_zeropadding (ZeroPadding2(None, 64, 114, 114)  0           pool1[0][0]
     # 09 conv2_1 (Convolution2D)          (None, 128, 112, 112) 73856       conv2_1_zeropadding[0][0]
@@ -46,7 +70,7 @@ def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
     model_vgg_places365_notop.layers[5].set_weights(model.layers[12].get_weights())
     # 13 relu2_2 (Activation)             (None, 128, 112, 112) 0           conv2_2[0][0]
     # 14 pool2 (MaxPooling2D)             (None, 128, 56, 56)   0           relu2_2[0][0]
-    model_vgg_places365_notop.layers[6].get_weights()
+    model_vgg_places365_notop.layers[6].set_weights(model.layers[14].get_weights())
 
     # 15 conv3_1_zeropadding (ZeroPadding2(None, 128, 58, 58)   0           pool2[0][0]
     # 16 conv3_1 (Convolution2D)          (None, 256, 56, 56)   295168      conv3_1_zeropadding[0][0]
@@ -61,7 +85,7 @@ def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
     model_vgg_places365_notop.layers[9].set_weights(model.layers[22].get_weights())
     # 23 relu3_3 (Activation)             (None, 256, 56, 56)   0           conv3_3[0][0]
     # 24 pool3 (MaxPooling2D)             (None, 256, 28, 28)   0           relu3_3[0][0]
-    model_vgg_places365_notop.layers[10].get_weights()
+    model_vgg_places365_notop.layers[10].set_weights(model.layers[24].get_weights())
 
     # 25 conv4_1_zeropadding (ZeroPadding2(None, 256, 30, 30)   0           pool3[0][0]
     # 26 conv4_1 (Convolution2D)          (None, 512, 28, 28)   1180160     conv4_1_zeropadding[0][0]
@@ -76,7 +100,7 @@ def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
     model_vgg_places365_notop.layers[13].set_weights(model.layers[32].get_weights())
     # 33 relu4_3 (Activation)             (None, 512, 28, 28)   0           conv4_3[0][0]
     # 34 pool4 (MaxPooling2D)             (None, 512, 14, 14)   0           relu4_3[0][0]
-    model_vgg_places365_notop.layers[14].get_weights()
+    model_vgg_places365_notop.layers[14].set_weights(model.layers[34].get_weights())
 
     # 35 conv5_1_zeropadding (ZeroPadding2(None, 512, 16, 16)   0           pool4[0][0]
     # 36 conv5_1 (Convolution2D)          (None, 512, 14, 14)   2359808     conv5_1_zeropadding[0][0]
@@ -91,7 +115,7 @@ def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
     model_vgg_places365_notop.layers[17].set_weights(model.layers[42].get_weights())
     # 43 relu5_3 (Activation)             (None, 512, 14, 14)   0           conv5_3[0][0]
     # 44 pool5 (MaxPooling2D)             (None, 512, 7, 7)     0           relu5_3[0][0]
-    model_vgg_places365_notop.layers[18].get_weights()
+    model_vgg_places365_notop.layers[18].set_weights(model.layers[44].get_weights())
 
     return model_vgg_places365_notop
 
@@ -108,4 +132,5 @@ if __name__ == "__main__":
     from compare_model_parameters import equal_model
     print 'places vgg and imagenet vgg are : ' \
           + ('the same' if equal_model(model_vgg_places365_notop, model_vgg_imagenet_notop) else 'different')
+    model_vgg_places365_notop.save_weights('models/vgg16_places365_notop_newpool.h5')
 
