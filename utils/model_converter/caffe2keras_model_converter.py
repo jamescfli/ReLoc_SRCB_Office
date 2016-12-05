@@ -5,7 +5,7 @@ from keras.applications import vgg16
 from keras.layers import Input
 
 
-def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
+def load_vgg16_notop_from_caffemodel(load_path='models/'):
 
     prototxt = 'train_vgg16_places365.prototxt'
     caffemodel = 'vgg16_places365.caffemodel'
@@ -60,6 +60,19 @@ def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
     #     raise ValueError(
     #         "You must provide a tuple value for the window size."
     #     )
+    # # in .prototxt file the pooling layer is expressed as the following, i.e. no 'ds' or 'ws'
+    # layer
+    # {
+    #     name: "pool1"
+    #     type: "Pooling"
+    #     bottom: "conv1_2"
+    #     top: "pool1"
+    #     pooling_param {
+    #         pool: MAX
+    #         kernel_size: 2
+    #         stride: 2
+    #     }
+    # }
 
     # 08 conv2_1_zeropadding (ZeroPadding2(None, 64, 114, 114)  0           pool1[0][0]
     # 09 conv2_1 (Convolution2D)          (None, 128, 112, 112) 73856       conv2_1_zeropadding[0][0]
@@ -121,7 +134,7 @@ def load_vgg16_notop_from_caffemodel(load_path='../../pretrain/models/'):
 
 if __name__ == "__main__":
 
-    # verify change to Places365
+    # verify change to Places365, for comparison
     img_width = 224
     img_height = 224
     img_size = (3, img_width, img_height)
@@ -130,7 +143,12 @@ if __name__ == "__main__":
 
     model_vgg_places365_notop = load_vgg16_notop_from_caffemodel()
     from compare_model_parameters import equal_model
-    print 'places vgg and imagenet vgg are : ' \
+    print 'places365 vgg and imagenet vgg are : ' \
           + ('the same' if equal_model(model_vgg_places365_notop, model_vgg_imagenet_notop) else 'different')
-    model_vgg_places365_notop.save_weights('models/vgg16_places365_notop_newpool.h5')
 
+    # save model structure as json
+    model_vgg_places365_notop_json = model_vgg_places365_notop.to_json()
+    with open('models/vgg16_places365_notop_structure.json', "w") as json_file_model_stacked:
+        json_file_model_stacked.write(model_vgg_places365_notop_json)
+    # and weights as h5 file
+    model_vgg_places365_notop.save_weights('models/vgg16_places365_notop_weights.h5')
