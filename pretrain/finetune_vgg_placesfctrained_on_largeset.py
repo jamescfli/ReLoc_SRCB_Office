@@ -43,20 +43,13 @@ def build_vggfc_model(vgg_initial_weights='places',
                              b_learning_rate_multiplier=learning_rate_multiplier,
                              activation='relu')(vgg_model_output)
     vgg_model_output = Dropout(dropout_ratio)(vgg_model_output)
-    vgg_model_output = Dense(nb_fc_hidden_node,
-                               name='FC_Dense_2',
-                               W_constraint=maxnorm(weight_constraint),
-                               W_learning_rate_multiplier=learning_rate_multiplier,
-                               b_learning_rate_multiplier=learning_rate_multiplier,
-                               activation='relu')(vgg_model_output)
-    vgg_model_output = Dropout(dropout_ratio)(vgg_model_output)
     vgg_model_output = Dense(2,
-                             name='FC_Dense_3',
+                             name='FC_Dense_2',
                              W_learning_rate_multiplier=learning_rate_multiplier,
                              b_learning_rate_multiplier=learning_rate_multiplier,
                              activation='softmax')(vgg_model_output)
     vgg_model_withtop = Model(vgg_places_model_notop.input, vgg_model_output)
-    vgg_model_withtop.load_weights('models/train_input224_topfc1024_largeset_100epoch_DO0.5_WC2_HomeOrOff_model.h5',
+    vgg_model_withtop.load_weights('models/train_input224_top2fc1024_largeset_100epoch_DO0.5_WC2_HomeOrOff_model.h5',
                                    by_name=True)
 
     # set frozen layers
@@ -93,7 +86,7 @@ def build_vggfc_model(vgg_initial_weights='places',
 nb_hidden_node = 1024
 do_ratio = 0.5
 weight_con = 2
-nb_fzlayer = 19         # 11 block4, 15 block5, 19 top fc
+nb_fzlayer = 15         # 11 block4, 15 block5, 19 top fc
 learning_rate = 1e-5    # to conv layers
 lr_multiplier = 1.0    # to top fc layers
 model_stacked = build_vggfc_model(nb_fc_hidden_node=nb_hidden_node,
@@ -152,7 +145,7 @@ record = np.column_stack((np.array(history_callback.epoch) + 1,
                           history_callback.history['acc'],
                           history_callback.history['val_acc']))
 
-np.savetxt('training_procedure/convergence_vgg3fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.csv'
+np.savetxt('training_procedure/convergence_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.csv'
            .format(nb_hidden_node,
                    nb_fzlayer,
                    (history_callback.epoch[-1]+1),
@@ -160,7 +153,7 @@ np.savetxt('training_procedure/convergence_vgg3fc{}_largeset_{}fzlayer_{}epoch_s
                    int(lr_multiplier)),
            record, delimiter=',')
 model_stacked_json = model_stacked.to_json()
-with open('models/structure_vgg3fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.h5'
+with open('models/structure_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.h5'
                   .format(nb_hidden_node,
                           nb_fzlayer,
                           (history_callback.epoch[-1]+1),
@@ -168,7 +161,7 @@ with open('models/structure_vgg3fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeO
                           lr_multiplier), "w") \
         as json_file_model_stacked:
     json_file_model_stacked.write(model_stacked_json)
-model_stacked.save_weights('models/weights_vgg3fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.h5'
+model_stacked.save_weights('models/weights_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.h5'
                            .format(nb_hidden_node,
                                    nb_fzlayer,
                                    (history_callback.epoch[-1]+1),
