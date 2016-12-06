@@ -32,10 +32,33 @@ def build_vgg_places_model():
     return vgg_model_flatten
 
 batch_size = 32
-nb_sample = 3000*2  # 2 classes
-datagen_train = ImageDataGenerator(rescale=1./255)  # substract 128, check custom_image.py
+
+
+# # bottleneck feature vector for smallset
+# nb_sample = 3000*2  # 2 classes
+# datagen_train = ImageDataGenerator(rescale=1./255)  # substract 128, check custom_image.py
+# generator_train = datagen_train\
+#     .flow_from_directory('datasets/data_256_HomeOrOff/test/',
+#                          target_size=(img_height, img_width),   # 256^2 -> 224^2
+#                          batch_size=batch_size,
+#                          shuffle=False,
+#                          class_mode=None)
+# model = build_vgg_places_model()
+# bottleneck_feature_vector = model.predict_generator(generator_train, nb_sample)
+# nb_kernel_block5 = 512
+# size_feature_map = 7*7
+# assert bottleneck_feature_vector.shape == (nb_sample, nb_kernel_block5*size_feature_map),\
+#     'shape of bottle neck vector is not (6000, 512*7*7)'
+#
+# # save 602.1MB file
+# np.save(open('bottleneck_data/bottleneck_feature_vgg_places_smallset.npy', 'w'),
+#         bottleneck_feature_vector)
+
+# bottleneck feature vector for largeset
+nb_sample = 18344+29055  # 2 classes
+datagen_train = ImageDataGenerator(rescale=1./255)
 generator_train = datagen_train\
-    .flow_from_directory('datasets/data_256_HomeOrOff/test/',
+    .flow_from_directory('datasets/data_256_HomeOrOff/train/',
                          target_size=(img_height, img_width),   # 256^2 -> 224^2
                          batch_size=batch_size,
                          shuffle=False,
@@ -45,8 +68,8 @@ bottleneck_feature_vector = model.predict_generator(generator_train, nb_sample)
 nb_kernel_block5 = 512
 size_feature_map = 7*7
 assert bottleneck_feature_vector.shape == (nb_sample, nb_kernel_block5*size_feature_map),\
-    'shape of bottle neck vector is not (6000, 512*7*7)'
+    'shape of bottle neck vector does not match (47399, 512*7*7)'
 
-# save 602.1MB file
-np.save(open('bottleneck_data/bottleneck_feature_vgg_places_smallset.npy', 'w'),
+# save 4.8GB file
+np.save(open('bottleneck_data/bottleneck_feature_vgg_places_largeset.npy', 'w'),
         bottleneck_feature_vector)

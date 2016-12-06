@@ -15,14 +15,15 @@ from utils.timer import Timer
 img_height = 224
 img_width = 224
 
-train_data = np.load(open('bottleneck_data/bottleneck_feature_vgg_places_smallset.npy'
-                          .format(img_height, img_width)))
-train_label_index = np.array([0]*3000+[1]*3000)
-train_label = np_utils.to_categorical(train_label_index, nb_classes=2)
-
-assert train_data.shape[0] == train_label.shape[0], 'nb of data samples != nb of labels'
-print('training data shape: {}'.format(train_data.shape))
-print('training label shape: {}'.format(train_label.shape))
+# # load small dataset
+# train_data = np.load(open('bottleneck_data/bottleneck_feature_vgg_places_smallset.npy'
+#                           .format(img_height, img_width)))
+# train_label_index = np.array([0]*3000+[1]*3000)
+# train_label = np_utils.to_categorical(train_label_index, nb_classes=2)
+#
+# assert train_data.shape[0] == train_label.shape[0], 'nb of data samples != nb of labels'
+# print('training data shape: {}'.format(train_data.shape))
+# print('training label shape: {}'.format(train_label.shape))
 
 
 def create_model(dropout_ratio=0.5, weight_constraint=2, nb_hidden_node=256):
@@ -83,6 +84,19 @@ model = create_model(dropout_ratio=dropout_ratio,
                      weight_constraint=weight_constraint,
                      nb_hidden_node=nb_hidden_node)
 lossaccRTplot = LossAccRTPlot()
+
+# apply large dataset for fc layer pretraining
+
+# load large data set
+train_data = np.load(open('bottleneck_data/bottleneck_feature_vgg_places_largeset.npy'
+                          .format(img_height, img_width)))
+train_label_index = np.array([0]*18344+[1]*29055)
+train_label = np_utils.to_categorical(train_label_index, nb_classes=2)
+
+assert train_data.shape[0] == train_label.shape[0], 'nb of data samples != nb of labels'
+print('training data shape: {}'.format(train_data.shape))
+print('training label shape: {}'.format(train_label.shape))
+
 model.fit(train_data, train_label,
           batch_size=batch_size,
           nb_epoch=nb_epoch,
@@ -90,7 +104,7 @@ model.fit(train_data, train_label,
           verbose=1,
           # callbacks=[])
           callbacks=[lossaccRTplot])
-model.save_weights('models/train_input{}_topfc{}_smallset_{}epoch_DO{}_WC{}_OffHomeOff_model.h5'
+model.save_weights('models/train_input{}_topfc{}_largeset_{}epoch_DO{}_WC{}_OffHomeOff_model.h5'
                    .format(img_height,
                            nb_hidden_node,
                            nb_epoch,
