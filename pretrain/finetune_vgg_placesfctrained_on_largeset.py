@@ -5,7 +5,6 @@ from keras.layers import Input, Flatten, Dense, Dropout
 from keras.constraints import maxnorm
 from keras.applications import vgg16
 from keras.optimizers import SGD
-from keras.models import model_from_json
 
 from utils.custom_image import ImageDataGenerator
 from utils.loss_acc_history_rtplot import LossAccRTPlot
@@ -49,7 +48,7 @@ def build_vggfc_model(vgg_initial_weights='places',
                              b_learning_rate_multiplier=learning_rate_multiplier,
                              activation='softmax')(vgg_model_output)
     vgg_model_withtop = Model(vgg_places_model_notop.input, vgg_model_output)
-    vgg_model_withtop.load_weights('models/train_input224_top2fc1024_largeset_100epoch_DO0.5_WC2_HomeOrOff_model.h5',
+    vgg_model_withtop.load_weights('models/train_input224_top2fc256_largeset_100epoch_DO0.5_WC2_sgd1e-5_HomeOrOff_model.h5',
                                    by_name=True)
 
     # set frozen layers
@@ -63,38 +62,21 @@ def build_vggfc_model(vgg_initial_weights='places',
     return vgg_model_withtop      # total 26 layers
 
 
-# def load_vggfc_model(model_structure_path=None,
-#                      model_weight_path=None,
-#                      global_learning_rate=1e-05):
-#     # load structure
-#     json_file = open(model_structure_path, 'r')
-#     loaded_model_json = json_file.read()
-#     json_file.close()
-#     vgg_model_withtop = model_from_json(loaded_model_json)
-#     # load weights
-#     vgg_model_withtop.load_weights("model_weight_path")
-#     print "load " + model_structure_path + " and " + model_weight_path + " from disk"
-#     vgg_model_withtop.compile(loss='categorical_crossentropy',
-#                               optimizer=SGD(lr=global_learning_rate, momentum=0.9),
-#                               # optimizer='adadelta',
-#                               metrics=['accuracy'])
-#     print 'model compiled'
-#     return vgg_model_withtop
-
-
 # build model from scratch
-nb_hidden_node = 1024
+nb_hidden_node = 256
 do_ratio = 0.5
 weight_con = 2
 nb_fzlayer = 15         # 11 block4, 15 block5, 19 top fc
 learning_rate = 1e-5    # to conv layers
-lr_multiplier = 1.0    # to top fc layers
+lr_multiplier = 10.0    # to top fc layers
 model_stacked = build_vggfc_model(nb_fc_hidden_node=nb_hidden_node,
                                   dropout_ratio=do_ratio,
                                   weight_constraint=weight_con,
                                   nb_frozen_layer=nb_fzlayer,
                                   global_learning_rate=learning_rate,
                                   learning_rate_multiplier=lr_multiplier)
+# show model summary, check
+print model_stacked.summary()
 # # build model from trained one
 # model_struct_path = "models/structure..json"
 # model_wt_path = 'models/weights..h5'
@@ -153,7 +135,7 @@ np.savetxt('training_procedure/convergence_vgg2fc{}_largeset_{}fzlayer_{}epoch_s
                    int(lr_multiplier)),
            record, delimiter=',')
 model_stacked_json = model_stacked.to_json()
-with open('models/structure_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.h5'
+with open('models/structure_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.json'
                   .format(nb_hidden_node,
                           nb_fzlayer,
                           (history_callback.epoch[-1]+1),
