@@ -5,7 +5,6 @@ from keras.layers import Input, Flatten, Dense, Dropout
 from keras.constraints import maxnorm
 from keras.applications import vgg16
 from keras.optimizers import SGD
-from keras.models import load_model
 
 from utils.custom_image import ImageDataGenerator
 from utils.loss_acc_history_rtplot import LossAccRTPlot
@@ -22,7 +21,6 @@ def build_vggfc_model(vgg_initial_weights='places',
                       dropout_ratio=0.5,
                       weight_constraint=2,
                       nb_frozen_layer=0,
-                      global_learning_rate=1e-5,
                       learning_rate_multiplier=1.0):
     img_size = (3, img_height, img_width)  # expected: shape (nb_sample, 3, 480, 1920)
     input_tensor = Input(batch_shape=(None,) + img_size)
@@ -56,11 +54,8 @@ def build_vggfc_model(vgg_initial_weights='places',
     for layer in vgg_model_withtop.layers[:nb_frozen_layer]:
         layer.trainable = False
 
-    vgg_model_withtop.compile(loss='categorical_crossentropy',
-                              optimizer=SGD(lr=global_learning_rate, momentum=0.9),
-                              # optimizer=SGD(lr=global_learning_rate, momentum=0.9, decay=1e-4),
-                              # optimizer='rmsprop',
-                              metrics=['accuracy'])
+    # leave compile outside
+
     return vgg_model_withtop      # total 26 layers
 
 
@@ -69,33 +64,18 @@ nb_hidden_node = 256
 do_ratio = 0.5
 weight_con = 2
 nb_fzlayer = 15         # 11 block4, 15 block5, 19 top fc
-learning_rate = 1e-4    # to conv layers
-lr_multiplier = 1.0    # to top fc layers
+lr_multiplier = 1.0     # to top fc layers
 # initial training
 model_stacked = build_vggfc_model(nb_fc_hidden_node=nb_hidden_node,
                                   dropout_ratio=do_ratio,
                                   weight_constraint=weight_con,
                                   nb_frozen_layer=nb_fzlayer,
-                                  global_learning_rate=learning_rate,
                                   learning_rate_multiplier=lr_multiplier)
-# # continuous training
-# learning_rate = 1e-5    # reduce lr by one 10th
-# model_stacked = load_model('models/fullinfo_vgg2fc256_largeset_15fzlayer_150epoch_sgdlr1e-05m10.0_HomeOrOff_model.h5')
-# model_stacked.compile(loss='categorical_crossentropy',
-#                       optimizer=SGD(lr=learning_rate, momentum=0.9),
-#                       metrics=['accuracy'])
-# show model summary, check
 print model_stacked.summary()
-# # build model from trained one
-# model_struct_path = "models/structure..json"
-# model_wt_path = 'models/weights..h5'
-# model_stacked = load_vggfc_model(model_structure_path=model_struct_path,
-#                                    model_weight_path=model_wt_path,
-#                                    global_learning_rate=learning_rate)
-
 
 batch_size = 32
-nb_epoch = 50      # 356s/epoch, 14 hours 150 epochs
+nb_epoch = 200          # 356s/epoch, 14 hours 150 epochs
+learning_rate = 1e-4    # initial learning rate
 
 # prepare training data
 nb_train_sample = 18344+29055
@@ -119,48 +99,58 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   shuffle=False,    # one loss/acc value, no need for shuffle
                                                   class_mode='categorical')
 
-# fit model
-loss_acc_rtplot = LossAccRTPlot()
-history_callback = model_stacked.fit_generator(generator_train,
-                                               samples_per_epoch=nb_train_sample,
-                                               nb_epoch=nb_epoch,
-                                               validation_data=generator_test,
-                                               nb_val_samples=nb_test_sample,
-                                               # callbacks=[])
-                                               callbacks=[loss_acc_rtplot])
+# fine tune with annealing
+nb_epoch_per_stage = 20
+nb_stage = nb_epoch/nb_epoch_per_stage
+record = np.zeros((nb_epoch, 5), dtype='float32')
+for stage in np.arange(nb_stage):
+    learning_rate_stage = learning_rate / (2.0**stage)  # halved learning rate for every 20 epochs, and recompile
+    model_stacked.compile(loss='categorical_crossentropy',
+                          optimizer=SGD(lr=learning_rate_stage, momentum=0.9),
+                          metrics=['accuracy'])
+    history_callback = model_stacked.fit_generator(generator_train,
+                                                   samples_per_epoch=nb_train_sample,
+                                                   nb_epoch=nb_epoch_per_stage,
+                                                   validation_data=generator_test,
+                                                   nb_val_samples=nb_test_sample)
+    # record
+    record_per_stage = np.column_stack((np.array(history_callback.epoch) + 1 + stage*nb_epoch_per_stage,
+                                        history_callback.history['loss'],
+                                        history_callback.history['val_loss'],
+                                        history_callback.history['acc'],
+                                        history_callback.history['val_acc']))
+    record[(stage*nb_epoch_per_stage):((stage+1)*nb_epoch_per_stage), :] = record_per_stage
 
-# record
-record = np.column_stack((np.array(history_callback.epoch) + 1,
-                          history_callback.history['loss'],
-                          history_callback.history['val_loss'],
-                          history_callback.history['acc'],
-                          history_callback.history['val_acc']))
 
-np.savetxt('training_procedure/convergence_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.csv'
+np.savetxt('training_procedure/convergence_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}anneal{}epoch_HomeOrOff_model.csv'
            .format(nb_hidden_node,
                    nb_fzlayer,
-                   (history_callback.epoch[-1]+1),
+                   nb_epoch,
                    learning_rate,
-                   lr_multiplier),
+                   lr_multiplier,
+                   nb_epoch_per_stage),
            record, delimiter=',')
 model_stacked_json = model_stacked.to_json()
-with open('models/structure_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.json'
+with open('models/structure_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}anneal{}epoch_HomeOrOff_model.json'
                   .format(nb_hidden_node,
                           nb_fzlayer,
-                          (history_callback.epoch[-1]+1),
+                          nb_epoch,
                           learning_rate,
-                          lr_multiplier), "w") \
+                          lr_multiplier,
+                          nb_epoch_per_stage), "w") \
         as json_file_model_stacked:
     json_file_model_stacked.write(model_stacked_json)
-model_stacked.save_weights('models/weights_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.h5'
+model_stacked.save_weights('models/weights_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}anneal{}epoch_HomeOrOff_model.h5'
                            .format(nb_hidden_node,
                                    nb_fzlayer,
-                                   (history_callback.epoch[-1]+1),
+                                   nb_epoch,
                                    learning_rate,
-                                   lr_multiplier))
-model_stacked.save('models/fullinfo_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}_HomeOrOff_model.h5'
+                                   lr_multiplier,
+                                   nb_epoch_per_stage))
+model_stacked.save('models/fullinfo_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}anneal{}epoch_HomeOrOff_model.h5'
                    .format(nb_hidden_node,
                            nb_fzlayer,
-                           (history_callback.epoch[-1]+1),
+                           nb_epoch,
                            learning_rate,
-                           lr_multiplier))
+                           lr_multiplier,
+                           nb_epoch_per_stage))
