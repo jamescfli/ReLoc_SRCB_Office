@@ -74,8 +74,8 @@ model_stacked = build_vggfc_model(nb_fc_hidden_node=nb_hidden_node,
 print model_stacked.summary()
 
 batch_size = 32
-nb_epoch = 200          # 356s/epoch, 14 hours 150 epochs
-learning_rate = 1e-4    # initial learning rate
+nb_epoch = 200          # 356s/epoch
+learning_rate = 5e-5    # initial learning rate
 
 # prepare training data
 nb_train_sample = 18344+29055
@@ -100,11 +100,12 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   class_mode='categorical')
 
 # fine tune with annealing
-nb_epoch_per_stage = 20
+nb_epoch_per_stage = 50
 nb_stage = nb_epoch/nb_epoch_per_stage
 record = np.zeros((nb_epoch, 5), dtype='float32')
 for stage in np.arange(nb_stage):
-    learning_rate_stage = learning_rate / (2.0**stage)  # halved learning rate for every 20 epochs, and recompile
+    learning_rate_stage = learning_rate / (2.0**stage)  # halved learning rate for every 'nb_epoch_per_stage' epochs
+    print "learning rate for this stage: {}".format(learning_rate_stage)
     model_stacked.compile(loss='categorical_crossentropy',
                           optimizer=SGD(lr=learning_rate_stage, momentum=0.9),
                           metrics=['accuracy'])
@@ -131,15 +132,15 @@ np.savetxt('training_procedure/convergence_vgg2fc{}_largeset_{}fzlayer_{}epoch_s
                    nb_epoch_per_stage),
            record, delimiter=',')
 model_stacked_json = model_stacked.to_json()
-with open('models/structure_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}anneal{}epoch_HomeOrOff_model.json'
-                  .format(nb_hidden_node,
-                          nb_fzlayer,
-                          nb_epoch,
-                          learning_rate,
-                          lr_multiplier,
-                          nb_epoch_per_stage), "w") \
-        as json_file_model_stacked:
-    json_file_model_stacked.write(model_stacked_json)
+# with open('models/structure_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}anneal{}epoch_HomeOrOff_model.json'
+#                   .format(nb_hidden_node,
+#                           nb_fzlayer,
+#                           nb_epoch,
+#                           learning_rate,
+#                           lr_multiplier,
+#                           nb_epoch_per_stage), "w") \
+#         as json_file_model_stacked:
+#     json_file_model_stacked.write(model_stacked_json)
 model_stacked.save_weights('models/weights_vgg2fc{}_largeset_{}fzlayer_{}epoch_sgdlr{}m{}anneal{}epoch_HomeOrOff_model.h5'
                            .format(nb_hidden_node,
                                    nb_fzlayer,
