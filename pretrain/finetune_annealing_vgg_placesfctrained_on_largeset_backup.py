@@ -63,7 +63,7 @@ def build_vggfc_model(vgg_initial_weights='places',
 nb_hidden_node = 256
 do_ratio = 0.5
 weight_con = 2
-nb_fzlayer = 15         # 11 block4, 15 block5, 19 top fc
+nb_fzlayer = 11         # 11 block4, 15 block5, 19 top fc
 lr_multiplier = 10.0     # to top fc layers
 # initial training
 model_stacked = build_vggfc_model(nb_fc_hidden_node=nb_hidden_node,
