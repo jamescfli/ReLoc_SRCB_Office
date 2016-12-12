@@ -27,7 +27,7 @@ class ConvergencePlot():
             plt.xlim([self.epoch_convergence_df['epoch'][0], self.epoch_convergence_df['epoch'].__len__()])
             plt.xlabel('epoch')
             plt.ylabel('loss function')
-            plt.legend(['train_loss', 'valid_loss'], loc='upper right')
+            plt.legend(['train_loss', 'valid_loss'], loc='lower left')
             if save:
                 if not os.path.exists("./convergence_figures/"):
                     os.makedirs("./convergence_figures")
@@ -44,10 +44,10 @@ class ConvergencePlot():
             plt.figure()
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['train_acc'])
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['valid_acc'])
-            plt.xlim([self.epoch_convergence_df['epoch'][0], self.epoch_convergence_df['epoch'][-1]])
+            plt.xlim([self.epoch_convergence_df['epoch'][0], self.epoch_convergence_df['epoch'].__len__()])
             plt.xlabel('epoch')
             plt.ylabel('accuracy')
-            plt.legend(['train_acc', 'valid_acc'], loc='lower right')
+            plt.legend(['train_acc', 'valid_acc'], loc='upper left')
             if save:
                 if not os.path.exists("./convergence_figures/"):
                     os.makedirs("./convergence_figures")
@@ -60,10 +60,10 @@ class ConvergencePlot():
 
 
 if __name__ == '__main__':
-    path_name = 'relocation/training_procedure/'
-    file_name_smallset_3fc = 'convergence_vggrr3fc1024_largeset_15fzlayer_ls100_40epoch_sgdlr1e-05m1_reloc_model.csv'
-    columns = ['epoch', 'train_loss', 'valid_loss']
-    test_plot_smallset_3fc = ConvergencePlot(filename=path_name + file_name_smallset_3fc,
+    path_name = 'pretrain/training_procedure/'
+    file_name_largeset_2fc256 = 'convergence_vgg2fc256_largeset_15fzlayer_60epoch_sgdlr5e-5m1anneal20epoch_HomeOrOff_model.csv'
+    columns = ['epoch', 'train_loss', 'valid_loss', 'train_acc', 'valid_acc']
+    test_plot_largeset_2fc256 = ConvergencePlot(filename=path_name + file_name_largeset_2fc256,
                                              column_list=columns)
-    test_plot_smallset_3fc.plt_train_valid_loss()
-    test_plot_smallset_3fc.plt_train_valid_acc()
+    test_plot_largeset_2fc256.plt_train_valid_loss()
+    test_plot_largeset_2fc256.plt_train_valid_acc()

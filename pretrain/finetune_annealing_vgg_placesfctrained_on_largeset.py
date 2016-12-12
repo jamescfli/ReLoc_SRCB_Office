@@ -74,7 +74,7 @@ model_stacked = build_vggfc_model(nb_fc_hidden_node=nb_hidden_node,
 print model_stacked.summary()
 
 batch_size = 32
-nb_epoch = 200          # 356s/epoch
+nb_epoch = 60          # 356s/epoch
 learning_rate = 5e-5    # initial learning rate
 
 # prepare training data
@@ -100,7 +100,7 @@ generator_test = datagen_test.flow_from_directory('datasets/data_256_HomeOrOff/t
                                                   class_mode='categorical')
 
 # fine tune with annealing
-nb_epoch_per_stage = 50
+nb_epoch_per_stage = 20
 nb_stage = nb_epoch/nb_epoch_per_stage
 record = np.zeros((nb_epoch, 5), dtype='float32')
 for stage in np.arange(nb_stage):
