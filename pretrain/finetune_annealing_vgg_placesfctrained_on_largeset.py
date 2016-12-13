@@ -71,7 +71,7 @@ model_stacked = build_vggfc_model(nb_fc_hidden_node=nb_hidden_node,
                                   weight_constraint=weight_con,
                                   nb_frozen_layer=nb_fzlayer,
                                   learning_rate_multiplier=lr_multiplier)
-print model_stacked.summary()
+model_stacked.summary()
 
 batch_size = 32
 nb_epoch = 60          # 356s/epoch

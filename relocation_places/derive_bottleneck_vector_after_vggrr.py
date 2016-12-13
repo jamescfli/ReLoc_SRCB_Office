@@ -11,6 +11,7 @@ import numpy as np
 img_height = 224  # options: 448, 224, original 450*1920
 img_width = img_height * 4
 
+
 # build vgg + rotation robust layer, ~143MB GPU mem occupation
 def build_vggrr_model():
     img_size = (3, img_height, img_width)  # expected: shape (nb_sample, 3, 480, 1920)

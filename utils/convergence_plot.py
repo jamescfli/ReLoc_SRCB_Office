@@ -61,9 +61,9 @@ class ConvergencePlot():
 
 if __name__ == '__main__':
     path_name = 'pretrain/training_procedure/'
-    file_name_largeset_2fc256 = 'convergence_vgg2fc256_largeset_15fzlayer_60epoch_sgdlr5e-5m1anneal20epoch_HomeOrOff_model.csv'
+    file_name_largeset_2fc256 = 'convergence_vgg2fc256_largeset_11fzlayer_60epoch_sgdlr5e-5m10anneal20epoch_HomeOrOff_model.csv'
     columns = ['epoch', 'train_loss', 'valid_loss', 'train_acc', 'valid_acc']
     test_plot_largeset_2fc256 = ConvergencePlot(filename=path_name + file_name_largeset_2fc256,
-                                             column_list=columns)
+                                                column_list=columns)
     test_plot_largeset_2fc256.plt_train_valid_loss()
     test_plot_largeset_2fc256.plt_train_valid_acc()
