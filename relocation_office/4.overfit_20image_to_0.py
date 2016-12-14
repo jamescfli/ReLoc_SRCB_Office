@@ -53,7 +53,7 @@ seed = 7
 np.random.seed(seed)
 
 nb_hidden_node = 4096
-dropout_ratio = 0.1
+dropout_ratio = 0.0
 weight_constraint = 2
 model = create_model(dropout_ratio=dropout_ratio,
                      weight_constraint=weight_constraint,
@@ -68,6 +68,7 @@ model.fit(train_data, train_label,
 
 # Result after 3000 epochs (batch_size=20) + x100 label + no DO layers (ratio=0.0) + 4096 hidden nodes
 #   SGD(lr=1e-5, momentum=0.9) - 1.3175e-08 (first success)
+#                                1.1925e-08 (on MBP)
 #   adadelta - 8.2241 (failed)
 # 2048 hidden nodes
 #   SGD(lr=1e-5, momentum=0.9) - 1.0444e-08
