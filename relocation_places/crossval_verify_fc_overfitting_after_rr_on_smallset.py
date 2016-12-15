@@ -8,7 +8,7 @@ from keras.wrappers.scikit_learn import KerasRegressor
 from sklearn.model_selection import GridSearchCV
 
 import numpy as np
-from utils.loss_acc_history_rtplot import LossRTPlot
+from utils.loss_acc_mse_history_rtplot import LossRTPlot
 from utils.timer import Timer
 
 img_height = 448  # options: 448, 224, original 450*1920

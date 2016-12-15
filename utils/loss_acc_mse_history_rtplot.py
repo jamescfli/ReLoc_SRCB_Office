@@ -92,6 +92,91 @@ class LossAccRTPlot(Callback):
         self.figure.canvas.draw()
 
 
+class LossMseRTPlot(Callback):
+    def on_train_begin(self, logs={}):
+        self.nb_epoch = 0
+        self.train_losses = []
+        self.train_mses = []
+        self.valid_losses = []
+        self.valid_mses = []
+        self.figure = plt.figure(1)
+        self.subplot_loss = self.figure.add_subplot(121)
+        self.subplot_loss.set_title('loss function')
+        self._subplot_x_bound = [1,10]          # same for both loss and mse
+        self._subplot_loss_y_bound = [0,10]     # assume loss is positive
+        self.subplot_loss.set_xlim(self._subplot_x_bound)
+        self.subplot_loss.set_ylim(self._subplot_loss_y_bound)
+        self.line_train_loss, = self.subplot_loss.plot(np.arange(1,self.nb_epoch+1), self.train_losses)
+        self.line_valid_loss, = self.subplot_loss.plot(np.arange(1,self.nb_epoch+1), self.valid_losses)
+        self.subplot_mse = self.figure.add_subplot(122)
+        self.subplot_mse.set_title('MSE')
+        self._subplot_mse_y_bound = [0, 1]
+        self.subplot_mse.set_xlim(self._subplot_x_bound)
+        self.subplot_mse.set_ylim(self._subplot_mse_y_bound)
+        self.line_train_mse, = self.subplot_mse.plot(np.arange(1, self.nb_epoch + 1), self.train_mses)
+        self.line_valid_mse, = self.subplot_mse.plot(np.arange(1, self.nb_epoch + 1), self.valid_mses)
+        self.figure.show()
+
+    def on_epoch_end(self, epoch, logs={}):
+        self.nb_epoch += 1
+        self.train_losses.append(logs.get('loss'))
+        self.train_mses.append(logs.get('mean_squared_error'))
+        self.valid_losses.append(logs.get('val_loss'))
+        self.valid_mses.append(logs.get('val_mean_squared_error'))
+        self._update_loss_plot()
+        self._update_mse_plot()
+
+    # if need to leave the figure in the air
+    def on_train_end(self, logs={}):
+        raw_input()
+
+    def _update_loss_plot(self):
+        self._subplot_x_bound[1] = np.ceil(self.nb_epoch / 10.0) * 10
+        self.subplot_loss.set_xlim(self._subplot_x_bound)
+
+        if self.valid_losses[0] is None:
+            self.line_train_loss.set_xdata(np.append(self.line_train_loss.get_xdata(), self.nb_epoch))
+            self.line_train_loss.set_ydata(self.train_losses)
+            self._subplot_loss_y_bound[0] = min(self.train_losses)
+            self._subplot_loss_y_bound[1] = max(self.train_losses)
+        else:
+            self.line_train_loss.set_xdata(np.append(self.line_train_loss.get_xdata(), self.nb_epoch))
+            self.line_train_loss.set_ydata(self.train_losses)
+            self.line_valid_loss.set_xdata(np.append(self.line_valid_loss.get_xdata(), self.nb_epoch))
+            self.line_valid_loss.set_ydata(self.valid_losses)
+            self._subplot_loss_y_bound[0] = min(min(self.train_losses), min(self.valid_losses))
+            self._subplot_loss_y_bound[1] = max(max(self.train_losses), max(self.valid_losses))
+
+        self._subplot_loss_y_bound[0] = np.floor(self._subplot_loss_y_bound[0] * 10) / 10
+        self._subplot_loss_y_bound[1] = np.ceil(self._subplot_loss_y_bound[1] * 10) / 10
+        self.subplot_loss.set_ylim(self._subplot_loss_y_bound)
+
+        self.figure.canvas.draw()
+
+    def _update_mse_plot(self):
+        self._subplot_x_bound[1] = np.ceil(self.nb_epoch / 10.0) * 10
+        self.subplot_mse.set_xlim(self._subplot_x_bound)
+
+        if self.valid_mses[0] is None:
+            self.line_train_mse.set_xdata(np.append(self.line_train_mse.get_xdata(), self.nb_epoch))
+            self.line_train_mse.set_ydata(self.train_mses)
+            self._subplot_mse_y_bound[0] = min(self.train_mses)
+            self._subplot_mse_y_bound[1] = max(self.train_mses)
+        else:
+            self.line_train_mse.set_xdata(np.append(self.line_train_mse.get_xdata(), self.nb_epoch))
+            self.line_train_mse.set_ydata(self.train_mses)
+            self.line_valid_mse.set_xdata(np.append(self.line_valid_mse.get_xdata(), self.nb_epoch))
+            self.line_valid_mse.set_ydata(self.valid_mses)
+            self._subplot_mse_y_bound[0] = min(min(self.train_mses), min(self.valid_mses))
+            self._subplot_mse_y_bound[1] = max(max(self.train_mses), max(self.valid_mses))
+
+        self._subplot_mse_y_bound[0] = np.floor(self._subplot_mse_y_bound[0] * 10) / 10
+        self._subplot_mse_y_bound[1] = np.ceil(self._subplot_mse_y_bound[1] * 10) / 10
+        self.subplot_mse.set_ylim(self._subplot_mse_y_bound)
+
+        self.figure.canvas.draw()
+
+
 class LossRTPlot(Callback):
     def on_train_begin(self, logs={}):
         self.nb_epoch = 0

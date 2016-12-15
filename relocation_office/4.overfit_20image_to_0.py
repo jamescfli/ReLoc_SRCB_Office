@@ -6,7 +6,7 @@ from keras.optimizers import SGD
 from keras.regularizers import l1l2
 
 import numpy as np
-from utils.loss_acc_history_rtplot import LossRTPlot
+from utils.loss_acc_mse_history_rtplot import LossRTPlot
 
 img_height = 448
 img_width = img_height * 4
@@ -121,11 +121,3 @@ model.summary()     # confirmation
 # if delete weight_constraint maxnorm(2)
 #   2048 hidden node loss = 5.1211e-10 even further down
 #   256  hidden node loss = 3.5416e-10
-
-# model.save_weights('models/train_input{}_topfc{}_smallset_ls{}_{}epoch_DO{}_WC{}_reloc_model.h5'
-#                    .format(img_height,
-#                            nb_hidden_node,
-#                            label_scaling_factor,    # ls - label scalar
-#                            nb_epoch,
-#                            dropout_ratio,
-#                            weight_constraint))

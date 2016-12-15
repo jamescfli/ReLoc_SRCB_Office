@@ -9,7 +9,7 @@ from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
 
 import numpy as np
-from utils.loss_acc_history_rtplot import LossAccRTPlot
+from utils.loss_acc_mse_history_rtplot import LossAccRTPlot
 from utils.timer import Timer
 
 img_height = 224

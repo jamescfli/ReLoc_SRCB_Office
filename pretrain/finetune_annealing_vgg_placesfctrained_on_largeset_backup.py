@@ -7,7 +7,7 @@ from keras.applications import vgg16
 from keras.optimizers import SGD
 
 from utils.custom_image import ImageDataGenerator
-from utils.loss_acc_history_rtplot import LossAccRTPlot
+from utils.loss_acc_mse_history_rtplot import LossAccRTPlot
 
 import numpy as np
 

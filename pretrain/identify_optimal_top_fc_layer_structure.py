@@ -7,7 +7,7 @@ from keras.utils import np_utils
 from keras.optimizers import SGD
 
 import numpy as np
-from utils.loss_acc_history_rtplot import LossAccRTPlot
+from utils.loss_acc_mse_history_rtplot import LossAccRTPlot
 
 
 # load large data set as training set
