@@ -15,7 +15,7 @@ train_data = np.load(open('bottleneck_data/bottleneck_feature_vggrr_20image_{}x{
                           .format(img_height, img_width)))
 # apply x100 label values
 label_scaling_factor = 100
-train_label = np.loadtxt('datasets/train_test_split_480x1920/20imageset_label_x{}.csv'
+train_label = np.loadtxt('datasets/train_test_split_480x1920_20161125/20imageset_label_x{}.csv'
                          .format(label_scaling_factor),
                          dtype='float32', delimiter=',')
 # # try delete x100 scaling

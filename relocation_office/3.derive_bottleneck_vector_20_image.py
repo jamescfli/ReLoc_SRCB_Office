@@ -38,7 +38,7 @@ nb_sample = 20  # 4 * 5 batches
 datagen_train = ImageDataGenerator(rescale=1./255)
 # add subdir 'test' for class_mode=None recognition
 generator_train = datagen_train\
-    .flow_from_directory('datasets/train_test_split_480x1920/20_image_set/',    # leave folders not images
+    .flow_from_directory('datasets/train_test_split_480x1920_20161125/20_image_set/',    # leave folders not images
                          target_size=(img_height, img_width),
                          batch_size=batch_size,
                          shuffle=False,  # consisted with label sequence

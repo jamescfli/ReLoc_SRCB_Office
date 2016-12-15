@@ -39,7 +39,7 @@ batch_size = 16     # for height 448, limited by GPU mem
 nb_train_sample = 13182   # 4 * 5 batches
 datagen_train = ImageDataGenerator(rescale=1./255)
 generator_train = datagen_train\
-    .flow_from_directory('datasets/train_test_split_480x1920/train/',    # leave folders not images
+    .flow_from_directory('datasets/train_test_split_480x1920_20161125/train/',    # leave folders not images
                          target_size=(img_height, img_width),
                          batch_size=batch_size,
                          shuffle=False,  # maintain label sequence
@@ -48,7 +48,7 @@ generator_train = datagen_train\
 datagen_test = ImageDataGenerator(rescale=1./255)
 nb_test_sample = 2000
 generator_test = datagen_test\
-    .flow_from_directory('datasets/train_test_split_480x1920/test/',
+    .flow_from_directory('datasets/train_test_split_480x1920_20161125/test/',
                          target_size=(img_height, img_width),
                          batch_size=batch_size,
                          shuffle=False,
