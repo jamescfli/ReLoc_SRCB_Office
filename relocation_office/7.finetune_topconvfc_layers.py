@@ -62,7 +62,7 @@ nb_hidden_node = 2048
 do_ratio = 0.5
 nb_fzlayer = 11         # 11 block4, 15 block5, 19 top fc
 learning_rate = 1e-5    # to conv layers
-lr_multiplier = 1.0   # to top fc layers
+lr_multiplier = 10.0   # to top fc layers
 label_scalar = 100      # expend from [0, 1]
 model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
                                     dropout_ratio=do_ratio,
@@ -72,7 +72,7 @@ model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
                                     label_scaling_factor=label_scalar)
 
 batch_size = 16
-nb_epoch = 50
+nb_epoch = 30
 # prepare training data
 nb_train_sample = 13182
 
@@ -137,4 +137,4 @@ model_stacked.save_weights('models/weights_vggrr2fc{}_20161125img_{}fzlayer_ls{}
                                    label_scalar,
                                    nb_epoch,
                                    learning_rate,
-                                   int(lr_multiplier)))
+                                   int(lr_multiplier)), overwrite=False)
