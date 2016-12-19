@@ -4,14 +4,13 @@ from utils.custom_image import ImageDataGenerator
 from relocation_office.g_finetune_topconvfc_layers import build_vggrrfc_model
 
 import numpy as np
-import statsmodels.api as sm # recommended import according to the docs
+import statsmodels.api as sm
 import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
-    # derive x-y values for both training and testing set
     nb_hidden_node = 2048
     do_ratio = 0.5
-    nb_fzlayer = 24         # all un-trainable layers
+    nb_fzlayer = 24         # set all as un-trainable layers
     label_scalar = 100      # expend from [0, 1]
     model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
                                         dropout_ratio=do_ratio,
@@ -23,46 +22,35 @@ if __name__ == '__main__':
 
     img_height = 448
     img_width = img_height*4
-    batch_size = 2
-    nb_train_sample = 13182
-    datagen_train = ImageDataGenerator(rescale=1./255)
-    generator_train = datagen_train.flow_from_directory('datasets/train_test_split_480x1920_20161125/train/train_subdir/',
-                                                        target_size=(img_height, img_width),
-                                                        batch_size=batch_size,
-                                                        shuffle=False,
-                                                        class_mode='xy_pos',
-                                                        label_file="../../train_label_x{}.csv".format(label_scalar))
-    nb_test_sample = 2000
+    batch_size = 8
+    nb_test_sample = 12526     # dataset img20161215
     datagen_test = ImageDataGenerator(rescale=1./255)
-    generator_test = datagen_test.flow_from_directory('datasets/train_test_split_480x1920_20161125/test/test_subdir/',
+    generator_test = datagen_test.flow_from_directory('datasets/test_480x1920_20161215/image_480x1920/image_480x1920_subdir/',
                                                       target_size=(img_height, img_width),
                                                       batch_size=batch_size,
                                                       shuffle=False,
                                                       class_mode='xy_pos',
-                                                      label_file="../../test_label_x{}.csv".format(label_scalar))
-    train_pos = model_stacked.predict_generator(generator_train,
-                                                val_samples=nb_train_sample)
+                                                      label_file="../../label_list_480x1920_x{}.csv".format(label_scalar))
     test_pos = model_stacked.predict_generator(generator_test,
                                                val_samples=nb_test_sample)
     # check
-    print "train pos xy shape: {}".format(train_pos.shape)
     print "test pos xy shape: {}".format(test_pos.shape)
-    np.save(open('predicted_data/train_position_result_w20161125img.npy', 'w'), train_pos)
-    np.save(open('predicted_data/test_position_result_w20161125img.npy', 'w'), test_pos)
+    np.save(open('predicted_data/test_position_result_w20161215img.npy', 'w'), test_pos)
 
     # load the xy pos
     train_pos = np.load(open('predicted_data/train_position_result_w20161125img.npy', 'r'))
-    test_pos = np.load(open('predicted_data/test_position_result_w20161125img.npy', 'r'))
+    test_pos = np.load(open('predicted_data/test_position_result_w20161215img.npy', 'r'))
     train_pos_gt = np.loadtxt('datasets/train_test_split_480x1920_20161125/train_label_x{}.csv'
                               .format(label_scalar), dtype='float32', delimiter=',')
-    test_pos_gt = np.loadtxt('datasets/train_test_split_480x1920_20161125/test_label_x{}.csv'
-                             .format(label_scalar), dtype='float32', delimiter=',')
+    test_pos_gt_x1 = np.loadtxt('datasets/test_480x1920_20161215/label_list_480x1920_x1.csv',
+                                dtype='float32', delimiter=',')
+    test_pos_gt = test_pos_gt_x1*label_scalar
     # derive L2 error for both sets
-    train_error = np.linalg.norm(train_pos - train_pos_gt, ord=2, axis=1)     # if axis=0 is the sample index
+    train_error = np.linalg.norm(train_pos - train_pos_gt, ord=2, axis=1)
     test_error = np.linalg.norm(test_pos - test_pos_gt, ord=2, axis=1)
-    train_loss_mse = (train_error**2).mean()    # 0.56459689 vs 5.1683 in keras 50epoch
-    test_loss_mse = (test_error**2).mean()      # 0.62018335 vs 0.3101 in keras 50epoch
-    train_error = train_error*3600/label_scalar     # resume to cm
+    train_loss_mse = (train_error**2).mean()
+    test_loss_mse = (test_error**2).mean()
+    train_error = train_error*3600/label_scalar
     test_error = test_error*3600/label_scalar
 
     # draw pdf and cdf of the error in both sets

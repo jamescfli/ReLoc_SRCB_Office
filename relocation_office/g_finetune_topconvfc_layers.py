@@ -61,7 +61,7 @@ if __name__ == '__main__':
     do_ratio = 0.5
     nb_fzlayer = 11         # 11 block4, 15 block5, 19 top fc
     learning_rate = 1e-5    # to conv layers
-    lr_multiplier = 10.0   # to top fc layers
+    lr_multiplier = 1.0     # to top fc layers
     label_scalar = 100      # expend from [0, 1]
     model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
                                         dropout_ratio=do_ratio,

@@ -287,7 +287,7 @@ class ImageDataGenerator(object):
             dim_ordering=self.dim_ordering,
             batch_size=batch_size, shuffle=shuffle, seed=seed,
             save_to_dir=save_to_dir, save_prefix=save_prefix, save_format=save_format,
-            label_file= label_file)
+            label_file=label_file)
 
     def standardize(self, x):
         if self.rescale:
