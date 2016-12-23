@@ -36,7 +36,7 @@ if __name__ == '__main__':
                                                         label_file="../../train_label_x{}.csv".format(label_scalar))
     nb_test_sample = 2000
     datagen_test = ImageDataGenerator(rescale=1./255)
-    generator_test = datagen_test.flow_from_directory('datasets/test_480x1920_20161215/image_480x1920_2000_for_test/image_480x1920_2000/',
+    generator_test = datagen_test.flow_from_directory('datasets/test_image_20161215/image_480x1920_2000_for_test/image_480x1920_2000/',
                                                       target_size=(img_height, img_width),
                                                       batch_size=batch_size,
                                                       shuffle=False,
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     test_pos = np.load(open('predicted_data/test_position_result_w20161215img.npy', 'r'))
     train_pos_gt = np.loadtxt('datasets/train_test_split_480x1920_20161125/train_label_x{}.csv'
                               .format(label_scalar), dtype='float32', delimiter=',')
-    test_pos_gt = np.loadtxt('datasets/test_480x1920_20161215/label_list_480x1920_2000_x{}.csv'
+    test_pos_gt = np.loadtxt('datasets/test_image_20161215/label_list_480x1920_2000_x{}.csv'
                              .format(label_scalar), dtype='float32', delimiter=',')
     # derive L2 error for both sets
     train_error = np.linalg.norm(train_pos - train_pos_gt, ord=2, axis=1)     # if axis=0 is the sample index

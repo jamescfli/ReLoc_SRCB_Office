@@ -42,7 +42,7 @@ if __name__ == '__main__':
     test_pos = np.load(open('predicted_data/test_position_result_w20161215img.npy', 'r'))
     train_pos_gt = np.loadtxt('datasets/train_test_split_480x1920_20161125/train_label_x{}.csv'
                               .format(label_scalar), dtype='float32', delimiter=',')
-    test_pos_gt_x1 = np.loadtxt('datasets/test_480x1920_20161215/label_list_480x1920_x1.csv',
+    test_pos_gt_x1 = np.loadtxt('datasets/test_image_20161215/label_list_480x1920_x1.csv',
                                 dtype='float32', delimiter=',')
     test_pos_gt = test_pos_gt_x1*label_scalar
     # derive L2 error for both sets

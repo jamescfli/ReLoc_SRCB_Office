@@ -18,7 +18,7 @@ def load_labels(label_filename):
     return image_filename_list, label_array
 
 # data without augmentation
-dirname_label = 'datasets/test_480x1920_20161215/'
+dirname_label = 'datasets/test_image_20161215/'
 label_filename = 'label_list_480x1920_x1_wfilename.csv'
 # load labels
 image_filename_list, label_array = load_labels(dirname_label+label_filename)
@@ -35,8 +35,8 @@ mask_for_test[rand_sample_index] = True                     # select test set in
 test_label_list = []
 for i in np.arange(nb_total_image_set):
     if mask_for_test[i]:    # test image
-        copyfile('datasets/test_480x1920_20161215/image_480x1920/image_480x1920_subdir/'+image_filename_list[i],
-                 'datasets/test_480x1920_20161215/image_480x1920_2000_for_test/image_480x1920_2000/'+image_filename_list[i])
+        copyfile('datasets/test_image_20161215/image_480x1920/image_480x1920_subdir/'+image_filename_list[i],
+                 'datasets/test_image_20161215/image_480x1920_2000_for_test/image_480x1920_2000/'+image_filename_list[i])
         test_label_list.append(label_array[i,:])
 test_label_array = np.array(test_label_list)
 print 'test label shape: {}'.format(test_label_array.shape)
@@ -44,4 +44,4 @@ print 'test label shape: {}'.format(test_label_array.shape)
 test_label_array = 100 * test_label_array
 
 # save to csv file
-np.savetxt('datasets/test_480x1920_20161215/label_list_480x1920_2000_x100.csv', test_label_array, delimiter=',')
+np.savetxt('datasets/test_image_20161215/label_list_480x1920_2000_x100.csv', test_label_array, delimiter=',')

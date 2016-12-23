@@ -96,7 +96,7 @@ if __name__ == '__main__':
     nb_test_sample = 2000
     datagen_test = ImageDataGenerator(rescale=1./255)
     # no shuffle
-    generator_test = datagen_test.flow_from_directory('datasets/test_480x1920_20161215/image_480x1920_2000_for_test/image_480x1920_2000/',
+    generator_test = datagen_test.flow_from_directory('datasets/test_image_20161215/image_480x1920_2000_for_test/image_480x1920_2000/',
                                                       target_size=(img_height, img_width),
                                                       batch_size=batch_size,
                                                       class_mode='xy_pos',
