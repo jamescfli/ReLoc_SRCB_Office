@@ -659,7 +659,7 @@ class DirectoryIterator(Iterator):
                 fname = '{prefix}_{epoch_index}_{index:08}.{format}'.format(
                     prefix=self.save_prefix,
                     epoch_index=1,
-                    index=current_index + i,
+                    index=current_index + i + 1,    # start from 1
                     format=self.save_format)
                 img.save(os.path.join(self.save_to_dir, fname))
         # build batch of labels
