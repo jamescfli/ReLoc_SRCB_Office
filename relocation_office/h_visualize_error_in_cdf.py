@@ -1,7 +1,7 @@
 __author__ = 'bsl'
 
 from utils.custom_image import ImageDataGenerator
-from relocation_office.g_finetune_topconvfc_layers import build_vggrrfc_model
+from relocation_office.g_1_finetune_topconvfc_layers import build_vggrrfc_model
 
 import numpy as np
 import statsmodels.api as sm # recommended import according to the docs

@@ -12,7 +12,7 @@ from utils.loss_acc_mse_history_rtplot import LossMseRTPlot
 import numpy as np
 
 
-img_height = 448
+img_height = 224
 img_width = img_height*4
 
 
@@ -50,8 +50,8 @@ def build_vggrrfc_model(nb_fc_hidden_node=2048,
                                b_regularizer=l2(l2_regularization),
                                activation='linear')(vggrr_model_output)
     vggrr_model = Model(vgg_office_model_notop.input, vggrr_model_output)
-    toplayer_weight_file = 'train_input448_top2fc2048_ls100_100epoch_DO0.5_L1nm0.0L2nm0.0_reloc_model.h5'
-    vggrr_model.load_weights('models/' + toplayer_weight_file, by_name=True)
+    # toplayer_weight_file = 'train_input448_top2fc2048_ls100_100epoch_DO0.5_L1nm0.0L2nm0.0_reloc_model.h5'
+    # vggrr_model.load_weights('models/' + toplayer_weight_file, by_name=True)
 
     for layer in vggrr_model.layers[:nb_frozen_layer]:
         layer.trainable = False
@@ -82,15 +82,15 @@ if __name__ == '__main__':
     batch_size = 16
     nb_epoch = 30       # 30 epochs, 19 hours - perfect overnight run
     # prepare training data
-    nb_train_sample = 13182
+    nb_train_sample = 13182*5
 
     datagen_train = ImageDataGenerator(rescale=1./255)
-    generator_train = datagen_train.flow_from_directory('datasets/train_test_split_480x1920_20161125/train/train_subdir/',
+    generator_train = datagen_train.flow_from_directory('datasets/train_test_split_480x1920_20161125/train_augmented/train_augmented_subdir/',
                                                         target_size=(img_height, img_width),
                                                         batch_size=batch_size,
                                                         shuffle=True,
                                                         class_mode='xy_pos',
-                                                        label_file="../../train_label_x{}.csv".format(label_scalar))
+                                                        label_file="../../train_augmented_label_x{}.csv".format(label_scalar))
 
     # prepare test data, apply img20161215 for generalization
     nb_test_sample = 2000
@@ -120,7 +120,7 @@ if __name__ == '__main__':
                               history_callback.history['mean_squared_error'],
                               history_callback.history['val_mean_squared_error']))
 
-    np.savetxt('training_procedure/convergence_vggrr2fc{}_20161125img_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.csv'
+    np.savetxt('training_procedure/convergence_vggrr2fc{}_20161125imgaug_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.csv'
                .format(nb_hidden_node,
                        nb_fzlayer,
                        label_scalar,
@@ -130,7 +130,7 @@ if __name__ == '__main__':
                        l2_regular),
                record, delimiter=',')
     model_stacked_json = model_stacked.to_json()
-    with open('models/structure_vggrr2fc{}_20161125img_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
+    with open('models/structure_vggrr2fc{}_20161125imgaug_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
                       .format(nb_hidden_node,
                               nb_fzlayer,
                               label_scalar,
@@ -140,7 +140,7 @@ if __name__ == '__main__':
                               l2_regular), "w") \
             as json_file_model_stacked:
         json_file_model_stacked.write(model_stacked_json)
-    model_stacked.save_weights('models/weights_vggrr2fc{}_20161125img_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
+    model_stacked.save_weights('models/weights_vggrr2fc{}_20161125imgaug_{}fzlayer_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
                                .format(nb_hidden_node,
                                        nb_fzlayer,
                                        label_scalar,
