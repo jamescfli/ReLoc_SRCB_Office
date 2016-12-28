@@ -26,7 +26,8 @@ def build_vggrrfc_bn_model(weights='places',
                            learning_rate_multiplier=1.0,
                            l1_regularization=None,  # TODO
                            l2_regularization=None,
-                           is_BN_added=False):
+                           is_BN_enabled=False,
+                           is_DO_enabled=False):
 
     if weights not in {'imagenet', 'places', 'office', None}:
         raise ValueError('The `weights` argument should be either '
@@ -59,16 +60,16 @@ def build_vggrrfc_bn_model(weights='places',
     x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool')(x)
 
     # Block 5
-    if is_BN_added:
+    if is_BN_enabled:
         x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1')(x)
         x = BatchNormalization(name='block5_bn1')(x)
-        x = Activation('relu')(x)
+        x = Activation('relu', name='block5_act1')(x)
         x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2')(x)
         x = BatchNormalization(name='block5_bn2')(x)
-        x = Activation('relu')(x)
+        x = Activation('relu', name='block5_act2')(x)
         x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3')(x)
         x = BatchNormalization(name='block5_bn3')(x)
-        x = Activation('relu')(x)
+        x = Activation('relu', name='block5_act3')(x)
     else:
         x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1')(x)
         x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2')(x)
@@ -83,18 +84,19 @@ def build_vggrrfc_bn_model(weights='places',
               name='fc_dense_regress_1',
               W_learning_rate_multiplier=learning_rate_multiplier,
               b_learning_rate_multiplier=learning_rate_multiplier*2,    # *2 from LHY's practice
-              W_regularizer=l2(l2_regularization) if not l2_regularization else None,
-              b_regularizer=l2(l2_regularization) if not l2_regularization else None)(x)
-    if is_BN_added:
+              W_regularizer=l2(l2_regularization) if l2_regularization else None,
+              b_regularizer=l2(l2_regularization) if l2_regularization else None)(x)
+    if is_BN_enabled:
         x = BatchNormalization(name='fc_bn1')(x)
-    x = Activation('relu')(x)
-    x = Dropout(dropout_ratio, name='dropout_regress_1')(x)     # can possibly be dropped if BN
+    x = Activation('relu', name='fc_act1')(x)
+    if is_DO_enabled:
+        x = Dropout(dropout_ratio, name='fc_do_1')(x)     # can possibly be dropped if BN
     x = Dense(2,
               name='fc_dense_regress_2',
               W_learning_rate_multiplier=learning_rate_multiplier,
               b_learning_rate_multiplier=learning_rate_multiplier*2,
-              W_regularizer=l2(l2_regularization) if not l2_regularization else None,
-              b_regularizer=l2(l2_regularization) if not l2_regularization else None,
+              W_regularizer=l2(l2_regularization) if l2_regularization else None,
+              b_regularizer=l2(l2_regularization) if l2_regularization else None,
               activation='linear')(x)
     inputs = get_source_inputs(img_input)
     model = Model(inputs, x, name='vgg_blk5rrfc_bn_reg2out')
@@ -128,12 +130,13 @@ if __name__ == '__main__':
     # build model from scratch
     initial_weights = 'places'
     nb_hidden_node = 2048
-    do_ratio = 0.5
     learning_rate = 1e-5    # to conv layers
     lr_multiplier = 1.0     # to top fc layers
     l2_regular = 1e-3       # weight decay in L2 norm
     label_scalar = 100      # expend from [0, 1]
     flag_add_bn = True
+    flag_add_do = True
+    do_ratio = 0.5
     batch_size = 32         # tried 32
     nb_epoch = 30
     model_stacked = build_vggrrfc_bn_model(weights=initial_weights,
@@ -143,7 +146,8 @@ if __name__ == '__main__':
                                            learning_rate_multiplier=lr_multiplier,
                                            l1_regularization=None,
                                            l2_regularization=l2_regular,
-                                           is_BN_added=flag_add_bn)
+                                           is_BN_enabled=flag_add_bn,
+                                           is_DO_enabled=flag_add_do)
     model_stacked.summary()
 
     # prepare training data, augmented by 5 times
