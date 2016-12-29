@@ -101,7 +101,7 @@ def build_vggrrfc_bn_model(weights='places',
     inputs = get_source_inputs(img_input)
     model = Model(inputs, x, name='vgg_blk5rrfc_bn_reg2out')
 
-    # load weights
+    # log_2_finetune_topconvbnfc_layers.pyad weights
     if weights == 'imagenet':
         weights_path = get_file('vgg16_weights_th_dim_ordering_th_kernels_notop.h5',
                                 TH_WEIGHTS_PATH_NO_TOP,
@@ -128,7 +128,7 @@ def build_vggrrfc_bn_model(weights='places',
 
 if __name__ == '__main__':
     # build model from scratch
-    initial_weights = 'places'
+    initial_weights = 'imagenet'
     nb_hidden_node = 2048
     learning_rate = 1e-5    # to conv layers
     lr_multiplier = 1.0     # to top fc layers
@@ -191,8 +191,9 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'training_procedure/convergence_vggrr2fc{}bn_20161125imgaug_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.csv'
+        'training_procedure/convergence_vggrr2fc{}bn_{}_1125imgaug_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.csv'
         .format(nb_hidden_node,
+                initial_weights,
                 label_scalar,
                 nb_epoch,
                 learning_rate,
@@ -200,8 +201,9 @@ if __name__ == '__main__':
                 l2_regular),
         record, delimiter=',')
     model_stacked_json = model_stacked.to_json()
-    with open('models/structure_vggrr2fc{}bn_20161125imgaug_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
+    with open('models/structure_vggrr2fc{}bn_{}_1125imgaug_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
                       .format(nb_hidden_node,
+                              initial_weights,
                               label_scalar,
                               nb_epoch,
                               learning_rate,
@@ -210,8 +212,9 @@ if __name__ == '__main__':
             as json_file_model_stacked:
         json_file_model_stacked.write(model_stacked_json)
     model_stacked.save_weights(
-        'models/weights_vggrr2fc{}bn_20161125imgaug_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
+        'models/weights_vggrr2fc{}bn_{}_1125imgaug_ls{}_{}epoch_sgdlr{}m{}_l2reg{}_reloc_model.h5'
         .format(nb_hidden_node,
+                initial_weights,
                 label_scalar,
                 nb_epoch,
                 learning_rate,
