@@ -10,6 +10,7 @@ from keras.regularizers import l1, l2
 
 from utils.custom_image import ImageDataGenerator
 from utils.loss_acc_mse_history_rtplot import LossMseRTPlot
+from utils.lr_annealing import LearningRateAnnealing
 
 import numpy as np
 
@@ -130,15 +131,19 @@ if __name__ == '__main__':
     # build model from scratch
     initial_weights = 'imagenet'
     nb_hidden_node = 2048
-    learning_rate = 1e-5    # to conv layers
-    lr_multiplier = 1.0     # to top fc layers
-    l2_regular = 1e-3       # weight decay in L2 norm
-    label_scalar = 100      # expend from [0, 1]
+    learning_rate = 1e-5        # to conv layers
+    lr_multiplier = 1.0         # to top fc layers
+    l2_regular = 1e-3           # weight decay in L2 norm
+    label_scalar = 100          # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
-    batch_size = 32         # tried 32
-    nb_epoch = 30
+    batch_size = 32             # tried 32
+    nb_epoch = 50
+    nb_epoch_annealing = 10     # anneal for every ? epochs
+    annealing_factor = 0.5      # halved the lr each time
+    np.random.seed(7)           # to repeat results
+
     model_stacked = build_vggrrfc_bn_model(weights=initial_weights,
                                            nb_fc_hidden_node=nb_hidden_node,
                                            dropout_ratio=do_ratio,
@@ -175,12 +180,13 @@ if __name__ == '__main__':
 
     # fit model
     loss_mse_rtplot = LossMseRTPlot()
+    annealing_schedule = LearningRateAnnealing(nb_epoch_annealing, annealing_factor)
     history_callback = model_stacked.fit_generator(generator_train,
                                                    samples_per_epoch=nb_train_sample,
                                                    nb_epoch=nb_epoch,
                                                    validation_data=generator_test,
                                                    nb_val_samples=nb_test_sample,
-                                                   callbacks=[loss_mse_rtplot],
+                                                   callbacks=[loss_mse_rtplot, annealing_schedule],
                                                    verbose=1)
 
     # record
