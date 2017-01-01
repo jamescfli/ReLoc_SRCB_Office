@@ -18,6 +18,7 @@ class LearningRateAnnealing(Callback):
         old_lr = self.model.optimizer.lr.get_value()
         if epoch > 1 and (epoch % self.nb_epoch == 0):
             new_lr = self.annealing_factor * old_lr
+            print 'lr={}'.format(new_lr)    # show how lr evolves
             K.set_value(self.model.optimizer.lr, new_lr)
         else:
             K.set_value(self.model.optimizer.lr, old_lr)
