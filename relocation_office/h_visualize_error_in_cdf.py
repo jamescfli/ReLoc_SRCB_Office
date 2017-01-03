@@ -1,7 +1,7 @@
 __author__ = 'bsl'
 
 from utils.custom_image import ImageDataGenerator
-from relocation_office.g_1_finetune_topconvfc_layers import build_vggrrfc_model
+from relocation_office.g_2_finetune_topconvbnfc_layers import build_vggrrfc_bn_model
 
 import numpy as np
 import statsmodels.api as sm # recommended import according to the docs
@@ -12,18 +12,30 @@ from utils.timer import Timer
 if __name__ == '__main__':
     # derive x-y values for both training and testing set
     nb_hidden_node = 2048
+    learning_rate = 1e-5  # to conv layers
+    lr_multiplier = 1.0  # to top fc layers
+    l1_regular = 1e-3  # weight decay in L1 norm
+    l2_regular = 1e-3  # L2 norm
+    label_scalar = 100  # expend from [0, 1]
+    flag_add_bn = True
+    flag_add_do = True
     do_ratio = 0.5
-    nb_fzlayer = 24         # all un-trainable layers
-    label_scalar = 100      # expend from [0, 1]
-    model_stacked = build_vggrrfc_model(nb_fc_hidden_node=nb_hidden_node,
-                                        dropout_ratio=do_ratio,
-                                        nb_frozen_layer=nb_fzlayer)
+
+    model_stacked = build_vggrrfc_bn_model(nb_fc_hidden_node=nb_hidden_node,
+                                           dropout_ratio=do_ratio,
+                                           global_learning_rate=learning_rate,
+                                           learning_rate_multiplier=lr_multiplier,
+                                           l1_regularization=l1_regular,
+                                           l2_regularization=l2_regular,
+                                           is_bn_enabled=flag_add_bn,
+                                           is_do_enabled=flag_add_do)
     model_path = 'models/'
-    weight_filename = 'weights_vggrr2fc2048_20161125img_11fzlayer_ls100_30epoch_sgdlr1e-5m1_l2reg1e-3_reloc_model.h5'
+    weight_filename = 'weights_vggrr2fc2048bn_imagenet_1125imgaug_ls100_50epoch_sgdlr1e-5m1ae10af0.5_l1reg1e-3l2reg1e-3_reloc_model.h5'
     model_stacked.load_weights(model_path+weight_filename)
     model_stacked.summary()
+    print '# of layers: {}'.format(model_stacked.layers.__len__())
 
-    img_height = 448
+    img_height = 224
     img_width = img_height*4
     batch_size = 2
     nb_train_sample = 13182
@@ -42,10 +54,10 @@ if __name__ == '__main__':
                                                       shuffle=False,
                                                       class_mode='xy_pos',
                                                       label_file="../../label_list_480x1920_2000_x{}.csv".format(label_scalar))
-    with Timer('Generate training position xy'):    # 1185.50 secs
+    with Timer('Generate training position xy'):
         train_pos = model_stacked.predict_generator(generator_train,
                                                     val_samples=nb_train_sample)
-    with Timer('Generate testing position xy'):     # 179.61 secs
+    with Timer('Generate testing position xy'):
         test_pos = model_stacked.predict_generator(generator_test,
                                                    val_samples=nb_test_sample)
     # check

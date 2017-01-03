@@ -20,7 +20,7 @@ TF_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/relea
 img_height = 224
 img_width = img_height*4
 
-def build_vggrrfc_bn_model(weights='places',
+def build_vggrrfc_bn_model(weights='imagenet',
                            nb_fc_hidden_node=2048,
                            dropout_ratio=0.5,
                            global_learning_rate=1e-5,
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     # build model from scratch
     initial_weights = 'imagenet'
     nb_hidden_node = 2048
-    learning_rate = 1e-5        # to conv layers
+    learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 1e-3           # weight decay in L1 norm
     l2_regular = 1e-3           # L2 norm
@@ -145,8 +145,8 @@ if __name__ == '__main__':
     do_ratio = 0.5
     batch_size = 32             # tried 32
     nb_epoch = 50
-    nb_epoch_annealing = 10     # anneal for every <> epochs
-    annealing_factor = 0.5      # halved the lr each time
+    nb_epoch_annealing = 1      # anneal for every <> epochs
+    annealing_factor = 0.95     # halved the lr each time
     np.random.seed(7)           # to repeat results
 
     model_stacked = build_vggrrfc_bn_model(weights=initial_weights,
@@ -159,6 +159,7 @@ if __name__ == '__main__':
                                            is_bn_enabled=flag_add_bn,
                                            is_do_enabled=flag_add_do)
     model_stacked.summary()
+    print '# of layers: {}'.format(model_stacked.layers.__len__())
 
     # prepare training data, augmented by 5 times
     nb_train_sample = 13182 * 5
