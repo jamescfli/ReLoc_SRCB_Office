@@ -12,7 +12,7 @@ from utils.timer import Timer
 if __name__ == '__main__':
     # derive x-y values for both training and testing set
     nb_hidden_node = 2048
-    learning_rate = 1e-5  # to conv layers
+    learning_rate = 1e-3  # to conv layers
     lr_multiplier = 1.0  # to top fc layers
     l1_regular = 1e-3  # weight decay in L1 norm
     l2_regular = 1e-3  # L2 norm
@@ -30,7 +30,7 @@ if __name__ == '__main__':
                                            is_bn_enabled=flag_add_bn,
                                            is_do_enabled=flag_add_do)
     model_path = 'models/'
-    weight_filename = 'weights_vggrr2fc2048bn_imagenet_1125imgaug_ls100_50epoch_sgdlr1e-5m1ae10af0.5_l1reg1e-3l2reg1e-3_reloc_model.h5'
+    weight_filename = 'weights_vggrr2fc2048bn_imagenet_1125imgvshift_ls100_100epoch_sgdlr1e-3m1ae30af0.1_l1reg1e-3l2reg1e-3_reloc_model.h5'
     model_stacked.load_weights(model_path+weight_filename)
     model_stacked.summary()
     print '# of layers: {}'.format(model_stacked.layers.__len__())

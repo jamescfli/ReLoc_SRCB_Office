@@ -133,7 +133,7 @@ def build_vggrrfc_bn_model(weights='imagenet',
 
 if __name__ == '__main__':
     # build model from scratch
-    initial_weights = 'imagenet'
+    initial_weights = 'places'
     nb_hidden_node = 2048
     learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
