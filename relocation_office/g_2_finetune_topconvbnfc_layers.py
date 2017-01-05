@@ -139,14 +139,14 @@ if __name__ == '__main__':
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 1e-3           # weight decay in L1 norm
     l2_regular = 1e-3           # L2 norm
-    label_scalar = 100          # expend from [0, 1]
+    label_scalar = 1            # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
     batch_size = 32             # tried 32
-    nb_epoch = 50
-    nb_epoch_annealing = 1      # anneal for every <> epochs
-    annealing_factor = 0.95     # halved the lr each time
+    nb_epoch = 100
+    nb_epoch_annealing = 30     # anneal for every <> epochs
+    annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
 
     model_stacked = build_vggrrfc_bn_model(weights=initial_weights,
@@ -162,16 +162,16 @@ if __name__ == '__main__':
     print '# of layers: {}'.format(model_stacked.layers.__len__())
 
     # prepare training data, augmented by 5 times
-    nb_train_sample = 13182 * 5
+    nb_train_sample = 13182
 
     datagen_train = ImageDataGenerator(rescale=1. / 255)
     generator_train = datagen_train.flow_from_directory(
-        'datasets/train_test_split_480x1920_20161125/train_augmented/train_augmented_subdir/',
+        'datasets/train_test_split_480x1920_20161125/train_v_shifted/train_v_shifted_subdir/',
         target_size=(img_height, img_width),
         batch_size=batch_size,
         shuffle=True,
         class_mode='xy_pos',
-        label_file="../../train_augmented_label_x{}.csv".format(label_scalar))
+        label_file="../../train_vshift_label_x{}.csv".format(label_scalar))
 
     # prepare test data, apply img20161215 for generalization
     nb_test_sample = 2000

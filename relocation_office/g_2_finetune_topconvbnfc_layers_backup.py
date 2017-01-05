@@ -145,8 +145,8 @@ if __name__ == '__main__':
     do_ratio = 0.5
     batch_size = 32             # tried 32
     nb_epoch = 100
-    nb_epoch_annealing = 30      # anneal for every <> epochs
-    annealing_factor = 0.1     # halved the lr each time
+    nb_epoch_annealing = 30     # anneal for every <> epochs
+    annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
 
     model_stacked = build_vggrrfc_bn_model(weights=initial_weights,
