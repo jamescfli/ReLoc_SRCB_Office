@@ -1,7 +1,7 @@
 __author__ = 'bsl'
 
 from utils.custom_image import ImageDataGenerator
-from relocation_office.g_2_finetune_topconvbnfc_layers import build_vggrrfc_bn_model
+from relocation_office.g_2_finetune_input224_topconvbnfc_layers import build_vggrrfc_bn_model
 
 import numpy as np
 import statsmodels.api as sm # recommended import according to the docs
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     lr_multiplier = 1.0  # to top fc layers
     l1_regular = 1e-3  # weight decay in L1 norm
     l2_regular = 1e-3  # L2 norm
-    label_scalar = 100  # expend from [0, 1]
+    label_scalar = 10  # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
@@ -30,7 +30,7 @@ if __name__ == '__main__':
                                            is_bn_enabled=flag_add_bn,
                                            is_do_enabled=flag_add_do)
     model_path = 'models/'
-    weight_filename = 'weights_vggrr2fc2048bn_imagenet_1125imgvshift_ls100_100epoch_sgdlr1e-3m1ae30af0.1_l1reg1e-3l2reg1e-3_reloc_model.h5'
+    weight_filename = 'weights_input224_vggrr2fc2048bn_imagenet_1125imgaug_ls10_100epoch_sgdlr1e-3m1ae30af0.1_l1reg1e-3l2reg1e-3_reloc_model.h5'
     model_stacked.load_weights(model_path+weight_filename)
     model_stacked.summary()
     print '# of layers: {}'.format(model_stacked.layers.__len__())
@@ -45,7 +45,7 @@ if __name__ == '__main__':
                                                         batch_size=batch_size,
                                                         shuffle=False,
                                                         class_mode='xy_pos',
-                                                        label_file="../../train_label_x{}.csv".format(label_scalar))
+                                                        label_file="../../train_vshift_label_x{}.csv".format(label_scalar))
     nb_test_sample = 2000
     datagen_test = ImageDataGenerator(rescale=1./255)
     generator_test = datagen_test.flow_from_directory('datasets/test_image_20161215/image_480x1920_2000_for_test/image_480x1920_2000/',
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # load the xy pos
     train_pos = np.load(open('predicted_data/train_position_result_w20161125img.npy', 'r'))
     test_pos = np.load(open('predicted_data/test_position_result_w20161215img.npy', 'r'))
-    train_pos_gt = np.loadtxt('datasets/train_test_split_480x1920_20161125/train_label_x{}.csv'
+    train_pos_gt = np.loadtxt('datasets/train_test_split_480x1920_20161125/train_vshift_label_x{}.csv'
                               .format(label_scalar), dtype='float32', delimiter=',')
     test_pos_gt = np.loadtxt('datasets/test_image_20161215/label_list_480x1920_2000_x{}.csv'
                              .format(label_scalar), dtype='float32', delimiter=',')

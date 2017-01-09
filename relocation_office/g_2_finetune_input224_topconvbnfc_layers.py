@@ -139,7 +139,7 @@ if __name__ == '__main__':
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 1e-3           # weight decay in L1 norm
     l2_regular = 1e-3           # L2 norm
-    label_scalar = 1            # expend from [0, 1]
+    label_scalar = 10           # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
@@ -203,8 +203,9 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'training_procedure/convergence_vggrr2fc{}bn_{}_1125imgaug_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.csv'
-        .format(nb_hidden_node,
+        'training_procedure/convergence_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.csv'
+        .format(img_height,
+                nb_hidden_node,
                 initial_weights,
                 label_scalar,
                 nb_epoch,
@@ -216,8 +217,9 @@ if __name__ == '__main__':
                 l2_regular),
         record, delimiter=',')
     model_stacked_json = model_stacked.to_json()
-    with open('models/structure_vggrr2fc{}bn_{}_1125imgaug_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
-                      .format(nb_hidden_node,
+    with open('models/structure_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
+                      .format(img_height,
+                              nb_hidden_node,
                               initial_weights,
                               label_scalar,
                               nb_epoch,
@@ -230,8 +232,9 @@ if __name__ == '__main__':
             as json_file_model_stacked:
         json_file_model_stacked.write(model_stacked_json)
     model_stacked.save_weights(
-        'models/weights_vggrr2fc{}bn_{}_1125imgaug_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
-        .format(nb_hidden_node,
+        'models/weights_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
+        .format(img_height,
+                nb_hidden_node,
                 initial_weights,
                 label_scalar,
                 nb_epoch,

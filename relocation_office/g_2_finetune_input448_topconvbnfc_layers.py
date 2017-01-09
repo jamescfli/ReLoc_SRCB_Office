@@ -17,7 +17,7 @@ import numpy as np
 TH_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_th_dim_ordering_th_kernels_notop.h5'
 TF_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
-img_height = 224
+img_height = 448
 img_width = img_height*4
 
 def build_vggrrfc_bn_model(weights='imagenet',
@@ -133,19 +133,19 @@ def build_vggrrfc_bn_model(weights='imagenet',
 
 if __name__ == '__main__':
     # build model from scratch
-    initial_weights = 'places'
+    initial_weights = 'imagenet'
     nb_hidden_node = 2048
     learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 1e-3           # weight decay in L1 norm
     l2_regular = 1e-3           # L2 norm
-    label_scalar = 100          # expend from [0, 1]
+    label_scalar = 10           # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
-    batch_size = 32             # tried 32
-    nb_epoch = 100
-    nb_epoch_annealing = 30     # anneal for every <> epochs
+    batch_size = 16              # tried 32 (224), 8(448)
+    nb_epoch = 200              # due to higher dimension of 448 img @ network bottle-neck
+    nb_epoch_annealing = 60      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
 
@@ -203,8 +203,9 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'training_procedure/convergence_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.csv'
-        .format(nb_hidden_node,
+        'training_procedure/convergence_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
+        .format(img_height,
+                nb_hidden_node,
                 initial_weights,
                 label_scalar,
                 nb_epoch,
@@ -216,8 +217,9 @@ if __name__ == '__main__':
                 l2_regular),
         record, delimiter=',')
     model_stacked_json = model_stacked.to_json()
-    with open('models/structure_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
-                      .format(nb_hidden_node,
+    with open('models/structure_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
+                      .format(img_height,
+                              nb_hidden_node,
                               initial_weights,
                               label_scalar,
                               nb_epoch,
@@ -230,8 +232,9 @@ if __name__ == '__main__':
             as json_file_model_stacked:
         json_file_model_stacked.write(model_stacked_json)
     model_stacked.save_weights(
-        'models/weights_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
-        .format(nb_hidden_node,
+        'models/weights_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
+        .format(img_height,
+                nb_hidden_node,
                 initial_weights,
                 label_scalar,
                 nb_epoch,
