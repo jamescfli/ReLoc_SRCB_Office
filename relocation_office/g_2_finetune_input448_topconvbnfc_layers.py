@@ -108,7 +108,6 @@ def build_vggrrfc_bn_model(weights='imagenet',
     inputs = get_source_inputs(img_input)
     model = Model(inputs, x, name='vgg_blk5rrfc_bn_reg2out')
 
-    # log_2_finetune_topconvbnfc_layers.pyad weights
     if weights == 'imagenet':
         weights_path = get_file('vgg16_weights_th_dim_ordering_th_kernels_notop.h5',
                                 TH_WEIGHTS_PATH_NO_TOP,
@@ -127,7 +126,7 @@ def build_vggrrfc_bn_model(weights='imagenet',
         print 'NOTE: no weights loaded to the model ..'
 
     # frozen layers has been annotated when building
-    # compile
+    # compile after loading weights
     model.compile(loss='mean_squared_error',
                   optimizer=SGD(lr=global_learning_rate, momentum=0.9),
                   metrics=['mean_squared_error'])
@@ -163,7 +162,9 @@ if __name__ == '__main__':
     model_stacked.summary()
     print '# of layers: {}'.format(model_stacked.layers.__len__())
 
-    # prepare training data, v-shift version
+    # prepare training data
+    #   aug     - shifted and augmented by 5 times
+    #   vshift  - vertical shifted only
     nb_train_sample = 13182
 
     datagen_train = ImageDataGenerator(rescale=1. / 255)
@@ -192,7 +193,7 @@ if __name__ == '__main__':
     # 2) lr annealing
     annealing_schedule = LearningRateAnnealing(nb_epoch_annealing, annealing_factor)
     # 3) checkpoint saving in case of outage
-    saver_filepath = 'model_checkpoint'
+    saver_filepath = 'model_checkpoints'
     saver_filename = 'model_latest_{epoch:03d}.h5'  # currently < 1000 epochs
     checkpoint_saver = ModelCheckpoint(saver_filepath+os.path.sep+saver_filename,
                                        monitor='val_mean_squared_error',
