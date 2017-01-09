@@ -11,7 +11,9 @@ from keras.regularizers import l1, l2, l1l2
 from utils.custom_image import ImageDataGenerator
 from utils.loss_acc_mse_history_rtplot import LossMseRTPlot
 from utils.lr_annealing import LearningRateAnnealing
+from keras.callbacks import ModelCheckpoint
 
+import os
 import numpy as np
 
 TH_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_th_dim_ordering_th_kernels_notop.h5'
@@ -184,9 +186,20 @@ if __name__ == '__main__':
         class_mode='xy_pos',
         label_file="../../label_list_480x1920_2000_x{}.csv".format(label_scalar))
 
-    # fit model
+    # model training callbacks
+    # 1) plot mse graphs
     loss_mse_rtplot = LossMseRTPlot()
+    # 2) lr annealing
     annealing_schedule = LearningRateAnnealing(nb_epoch_annealing, annealing_factor)
+    # 3) checkpoint saving in case of outage
+    saver_filepath = 'model_checkpoint'
+    saver_filename = 'model_latest_{epoch:03d}.h5'  # currently < 1000 epochs
+    checkpoint_saver = ModelCheckpoint(saver_filepath+os.path.sep+saver_filename,
+                                       monitor='val_mean_squared_error',
+                                       verbose=1,
+                                       save_best_only=False,
+                                       save_weights_only=True)
+    # fit model
     history_callback = model_stacked.fit_generator(generator_train,
                                                    samples_per_epoch=nb_train_sample,
                                                    nb_epoch=nb_epoch,
