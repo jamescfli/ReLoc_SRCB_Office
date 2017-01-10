@@ -140,13 +140,13 @@ if __name__ == '__main__':
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 1e-3           # weight decay in L1 norm
     l2_regular = 1e-3           # L2 norm
-    label_scalar = 10           # expend from [0, 1]
+    label_scalar = 100          # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
-    batch_size = 16              # tried 32 (224), 8(448)
-    nb_epoch = 200              # due to higher dimension of 448 img @ network bottle-neck
-    nb_epoch_annealing = 60      # anneal for every <> epochs
+    batch_size = 16              # tried 32 (224), 8(448) half of GPU
+    nb_epoch = 100              # due to higher dimension of 448 img @ network bottle-neck
+    nb_epoch_annealing = 30      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
 
