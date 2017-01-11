@@ -206,7 +206,7 @@ if __name__ == '__main__':
                                                    nb_epoch=nb_epoch,
                                                    validation_data=generator_test,
                                                    nb_val_samples=nb_test_sample,
-                                                   callbacks=[loss_mse_rtplot, annealing_schedule],
+                                                   callbacks=[loss_mse_rtplot, annealing_schedule, checkpoint_saver],
                                                    verbose=1)
 
     # record
