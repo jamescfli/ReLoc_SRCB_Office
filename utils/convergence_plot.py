@@ -25,10 +25,10 @@ class ConvergencePlot():
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['train_loss'])
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['valid_loss'])
             plt.xlim([self.epoch_convergence_df['epoch'][0], self.epoch_convergence_df['epoch'].__len__()])
-            # plt.ylim([0.0, 1.0])
+            plt.ylim([0.0, 2.0])
             plt.xlabel('epoch')
             plt.ylabel('loss function')
-            plt.legend(['train_loss', 'valid_loss'], loc='lower left')
+            plt.legend(['train_loss', 'valid_loss'], loc='upper right')
             if save:
                 if not os.path.exists("./convergence_figures/"):
                     os.makedirs("./convergence_figures")
@@ -66,10 +66,10 @@ class ConvergencePlot():
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['train_mse'])
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['valid_mse'])
             plt.xlim([self.epoch_convergence_df['epoch'][0], self.epoch_convergence_df['epoch'].__len__()])
-            # plt.ylim([0.0, 1.0])
+            plt.ylim([0.0, 2.0])
             plt.xlabel('epoch')
             plt.ylabel('MSE')
-            plt.legend(['train_mse', 'valid_mse'], loc='upper left')
+            plt.legend(['train_mse', 'valid_mse'], loc='upper right')
             if save:
                 if not os.path.exists("./convergence_figures/"):
                     os.makedirs("./convergence_figures")
@@ -83,7 +83,7 @@ class ConvergencePlot():
 
 if __name__ == '__main__':
     path_name = '../relocation_office/training_procedure/'
-    file_name_largeset_2fc2048 = 'convergence_vggrr2fc2048_20161125img_11fzlayer_ls100_30epoch_sgdlr1e-5m1_l2reg1e-3_reloc_model.csv'
+    file_name_largeset_2fc2048 = 'convergence_input448_vggrr2fc2048bn_imagenet_1125imgvshift_ls10_200epoch_sgdlr1e-03m1ae60af0.1_l1reg1e-03l2reg1e-03_reloc_model.csv'
     columns = ['epoch', 'train_loss', 'valid_loss', 'train_mse', 'valid_mse']
     test_plot_largeset_2fc2048 = ConvergencePlot(filename=path_name + file_name_largeset_2fc2048,
                                                  column_list=columns)

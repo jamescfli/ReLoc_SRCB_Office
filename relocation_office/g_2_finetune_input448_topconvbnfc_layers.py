@@ -140,7 +140,7 @@ if __name__ == '__main__':
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 1e-3           # weight decay in L1 norm
     l2_regular = 1e-3           # L2 norm
-    label_scalar = 100          # expend from [0, 1]
+    label_scalar = 1            # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
