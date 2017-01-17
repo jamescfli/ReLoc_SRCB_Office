@@ -1,7 +1,7 @@
 __author__ = 'bsl'
 
 from utils.custom_image import ImageDataGenerator
-from relocation_office.g_2_finetune_input224_topconvbnfc_layers import build_vggrrfc_bn_model
+from relocation_office.g_2_finetune_input448_topconvbnfc_layers import build_vggrrfc_bn_model
 
 import numpy as np
 import statsmodels.api as sm # recommended import according to the docs
@@ -16,7 +16,7 @@ if __name__ == '__main__':
     lr_multiplier = 1.0  # to top fc layers
     l1_regular = 1e-3  # weight decay in L1 norm
     l2_regular = 1e-3  # L2 norm
-    label_scalar = 10  # expend from [0, 1]
+    label_scalar = 1   # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
@@ -30,14 +30,14 @@ if __name__ == '__main__':
                                            is_bn_enabled=flag_add_bn,
                                            is_do_enabled=flag_add_do)
     model_path = 'models/'
-    weight_filename = 'weights_input224_vggrr2fc2048bn_imagenet_1125imgaug_ls10_100epoch_sgdlr1e-3m1ae30af0.1_l1reg1e-3l2reg1e-3_reloc_model.h5'
+    weight_filename = 'weights_input448_vggrr2fc2048bn_imagenet_1125imgvshift_ls1_100epoch_sgdlr1e-3m1ae30af0.1_l1reg1e-3l2reg1e-3_reloc_model.h5'
     model_stacked.load_weights(model_path+weight_filename)
     model_stacked.summary()
     print '# of layers: {}'.format(model_stacked.layers.__len__())
 
-    img_height = 224
+    img_height = 448
     img_width = img_height*4
-    batch_size = 2
+    batch_size = 1
     nb_train_sample = 13182
     datagen_train = ImageDataGenerator(rescale=1./255)
     generator_train = datagen_train.flow_from_directory('datasets/train_test_split_480x1920_20161125/train/train_subdir/',
