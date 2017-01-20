@@ -108,7 +108,7 @@ def build_vggrrfc_bn_model(img_height=224,
         topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3')(topf_path_x)
         topf_path_x = BatchNormalization(name='block5_bn3')(topf_path_x)
         topf_path_x = Activation('relu', name='block5_act3')(topf_path_x)
-        # TODO check consistency after training for all conv* layers, maybe duplicate names will be the problem
+        # Exception: The name "block1_conv1" is used 2 times in the model. All layer names should be unique.
     else:
         # body
         body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1')(body_path_x)
