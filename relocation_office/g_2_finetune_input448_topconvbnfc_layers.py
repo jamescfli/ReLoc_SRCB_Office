@@ -17,7 +17,6 @@ import os
 import numpy as np
 
 TH_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_th_dim_ordering_th_kernels_notop.h5'
-TF_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'
 
 img_height = 448
 img_width = img_height*4
@@ -48,19 +47,19 @@ def build_vggrrfc_bn_model(weights='imagenet',
     # Block 2
     x = Convolution2D(128, 3, 3, activation='relu', border_mode='same', name='block2_conv1', trainable=False)(x)
     x = Convolution2D(128, 3, 3, activation='relu', border_mode='same', name='block2_conv2', trainable=False)(x)
-    x = MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool')(x)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block2_pool', trainable=False)(x)
 
     # Block 3
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='block3_conv1', trainable=False)(x)
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='block3_conv2', trainable=False)(x)
     x = Convolution2D(256, 3, 3, activation='relu', border_mode='same', name='block3_conv3', trainable=False)(x)
-    x = MaxPooling2D((2, 2), strides=(2, 2), name='block3_pool')(x)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block3_pool', trainable=False)(x)
 
     # Block 4
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block4_conv1', trainable=False)(x)
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block4_conv2', trainable=False)(x)
     x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block4_conv3', trainable=False)(x)
-    x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool')(x)
+    x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool', trainable=False)(x)
 
     # Block 5
     if is_bn_enabled:
