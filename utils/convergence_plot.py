@@ -25,7 +25,7 @@ class ConvergencePlot():
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['train_loss'])
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['valid_loss'])
             plt.xlim([self.epoch_convergence_df['epoch'][0], self.epoch_convergence_df['epoch'].__len__()])
-            plt.ylim([0.0, 0.1])
+            plt.ylim([0.0, 0.2])
             plt.xlabel('epoch')
             plt.ylabel('loss function')
             plt.legend(['train_loss', 'valid_loss'], loc='upper right')
@@ -66,7 +66,7 @@ class ConvergencePlot():
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['train_mse'])
             plt.plot(self.epoch_convergence_df['epoch'], self.epoch_convergence_df['valid_mse'])
             plt.xlim([self.epoch_convergence_df['epoch'][0], self.epoch_convergence_df['epoch'].__len__()])
-            plt.ylim([0.0, 0.1])
+            plt.ylim([0.0, 0.2])
             plt.xlabel('epoch')
             plt.ylabel('MSE')
             plt.legend(['train_mse', 'valid_mse'], loc='upper right')
@@ -83,7 +83,7 @@ class ConvergencePlot():
 
 if __name__ == '__main__':
     path_name = '../relocation_office/training_procedure/'
-    file_name_largeset_2fc2048 = 'convergence_input448_vggrr2fc2048bn_imagenet_1125imgvshift_ls1_100epoch_sgdlr1e-3m1ae30af0.1_l1reg1e-3l2reg1e-3_reloc_model.csv'
+    file_name_largeset_2fc2048 = 'convergence_input224_vggrr2fc2048bn_places_1125imgvshift_ls1_100epoch_sgdlr1e-3m1ae30af0.1_l1reg1e-3l2reg1e-3_reloc_model.csv'
     columns = ['epoch', 'train_loss', 'valid_loss', 'train_mse', 'valid_mse']
     test_plot_largeset_2fc2048 = ConvergencePlot(filename=path_name + file_name_largeset_2fc2048,
                                                  column_list=columns)

@@ -134,7 +134,7 @@ def build_vggrrfc_bn_model(weights='imagenet',
 
 if __name__ == '__main__':
     # build model from scratch
-    initial_weights = 'imagenet'
+    initial_weights = 'places'
     nb_hidden_node = 2048
     learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
@@ -217,7 +217,7 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'training_procedure/convergence_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.csv'
+        'training_procedure/convergence_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
         .format(img_height,
                 nb_hidden_node,
                 initial_weights,
@@ -231,7 +231,7 @@ if __name__ == '__main__':
                 l2_regular),
         record, delimiter=',')
     model_stacked_json = model_stacked.to_json()
-    with open('models/structure_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
+    with open('models/structure_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
                       .format(img_height,
                               nb_hidden_node,
                               initial_weights,
@@ -246,7 +246,7 @@ if __name__ == '__main__':
             as json_file_model_stacked:
         json_file_model_stacked.write(model_stacked_json)
     model_stacked.save_weights(
-        'models/weights_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{}m{}ae{}af{}_l1reg{}l2reg{}_reloc_model.h5'
+        'models/weights_input{}_vggrr2fc{}bn_{}_1125imgvshift_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
         .format(img_height,
                 nb_hidden_node,
                 initial_weights,
