@@ -1,3 +1,5 @@
+__author__ = 'bsl'
+
 from keras.layers import (
     Input,
     Cropping2D,
@@ -13,27 +15,25 @@ from keras.layers import (
 from keras.regularizers import l1l2
 from keras.engine.topology import get_source_inputs
 from keras.models import Model
-# from keras.utils.data_utils import get_file
 from keras.optimizers import SGD
 from keras.applications import vgg16
 
 import numpy as np
-import sys
 
 
 # TH_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_th_dim_ordering_th_kernels_notop.h5'
 
 
-def build_vggrrfc_bn_model(img_height=224,
-                           weights='imagenet',
-                           nb_fc_hidden_node=2048,
-                           dropout_ratio=0.5,
-                           global_learning_rate=1e-5,
-                           learning_rate_multiplier=1.0,
-                           l1_regularization=0.0,
-                           l2_regularization=0.0,
-                           is_bn_enabled=False,
-                           is_do_enabled=False):
+def build_2path_vgg_bodytopf_model(img_height=224,
+                                   weights='imagenet',
+                                   nb_fc_hidden_node=2048,
+                                   dropout_ratio=0.5,
+                                   global_learning_rate=1e-5,
+                                   learning_rate_multiplier=1.0,
+                                   l1_regularization=0.0,
+                                   l2_regularization=0.0,
+                                   is_bn_enabled=False,
+                                   is_do_enabled=False):
 
     if weights not in {'imagenet', 'places', 'office', None}:
         raise ValueError('The `weights` argument should be either '
@@ -251,14 +251,14 @@ if __name__ == '__main__':
     nb_epoch_annealing = 30      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
-    model_stacked = build_vggrrfc_bn_model(img_height=img_height,
-                                           weights=initial_weights,
-                                           nb_fc_hidden_node=nb_hidden_node,
-                                           dropout_ratio=do_ratio,
-                                           global_learning_rate=learning_rate,
-                                           learning_rate_multiplier=lr_multiplier,
-                                           l1_regularization=l1_regular,
-                                           l2_regularization=l2_regular,
-                                           is_bn_enabled=flag_add_bn,
-                                           is_do_enabled=flag_add_do)
+    model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
+                                                   weights=initial_weights,
+                                                   nb_fc_hidden_node=nb_hidden_node,
+                                                   dropout_ratio=do_ratio,
+                                                   global_learning_rate=learning_rate,
+                                                   learning_rate_multiplier=lr_multiplier,
+                                                   l1_regularization=l1_regular,
+                                                   l2_regularization=l2_regular,
+                                                   is_bn_enabled=flag_add_bn,
+                                                   is_do_enabled=flag_add_do)
     model_stacked.summary()
