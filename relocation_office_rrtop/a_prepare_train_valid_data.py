@@ -1,3 +1,5 @@
+__author__ = 'bsl'
+
 # run with OpenCV
 from utils.convert_equirec_to_cube import convert_back_cv2_wrapper, cut_top_face
 import os
