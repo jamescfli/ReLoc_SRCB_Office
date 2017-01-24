@@ -179,7 +179,7 @@ def build_2path_vgg_bodytopf_model(img_height=224,
         #                         cache_subdir='models')
         print 'loading imagenet weights ..'
         # model.load_weights(weights_path, by_name=True)
-        model = load_imagenet_weights(model)
+        model = _load_imagenet_weights(model)
     elif weights == 'places':
         # weights_path = 'models/vgg16_places365_notop_weights.h5'
         print ("places still under construction ..")
@@ -203,7 +203,7 @@ def build_2path_vgg_bodytopf_model(img_height=224,
     return model
 
 
-def load_imagenet_weights(model_to_be_loaded):
+def _load_imagenet_weights(model_to_be_loaded):
     img_width = 224
     img_height = 224
     img_size = (3, img_width, img_height)

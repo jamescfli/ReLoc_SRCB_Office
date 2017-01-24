@@ -8,6 +8,11 @@ print label_list_train.dtype
 print label_list_train.shape
 print label_list_train.__class__
 
+# no augmentation
+label_scalar = 10
+label_list_train_x10 = label_list_train * label_scalar
+np.savetxt('datasets/label_list_train1125_15182_x{}.csv'.format(label_scalar), label_list_train_x10, delimiter=',')
+
 aug_factor = 10
 label_list_train_aug = np.vstack([label_list_train] * aug_factor)
 print label_list_train_aug[1234, :] == label_list_train_aug[1234+label_list_train.shape[0]*5, :]
@@ -20,7 +25,7 @@ np.savetxt('datasets/label_list_train1125_15182_aug{}_x{}.csv'.format(aug_factor
 print label_list_train_aug_x1.max()
 
 label_scalar = 10
-label_list_train_aug_x10 = label_list_train_aug * 10
+label_list_train_aug_x10 = label_list_train_aug * label_scalar
 np.savetxt('datasets/label_list_train1125_15182_aug{}_x{}.csv'.format(aug_factor, label_scalar), label_list_train_aug_x10, delimiter=',')
 print label_list_train_aug_x10.max()
 
@@ -31,6 +36,6 @@ print label_list_valid.shape
 print label_list_valid.__class__
 
 label_scalar = 10
-label_list_valid_x10 = label_list_valid*10
+label_list_valid_x10 = label_list_valid * label_scalar
 np.savetxt('datasets/label_list_valid1215_2000_x{}.csv'.format(label_scalar), label_list_valid_x10, delimiter=',')
 print label_list_valid_x10.max()
