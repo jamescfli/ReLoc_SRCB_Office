@@ -3,8 +3,7 @@ __author__ = 'bsl'
 import keras.caffe.convert as convert
 from keras.applications import vgg16
 from keras.layers import Input
-from keras.engine.topology import get_source_inputs
-from keras.models import Model
+from keras.utils.visualize_util import plot     # require 'python-pydot' and 'pydot' package
 
 from utils.timer import Timer
 
@@ -112,3 +111,5 @@ if __name__ == "__main__":
     with open('models/resnet152_places365_notop_structure_20170125.json', 'w') as json_file:
         json_file.write(model_resnet152_places365_notop_json)
     model_resnet152_places365_notop.save_weights('models/resnet152_places365_notop_weights_20170125.h5')
+    # model visualization
+    plot(model_resnet152_places365_notop, to_file='resnet152_places365_notop_pic_20170125.png')
