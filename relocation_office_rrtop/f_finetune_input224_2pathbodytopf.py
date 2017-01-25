@@ -17,7 +17,7 @@ if __name__ == '__main__':
     nb_hidden_node = 2048       # where fc layer for topf will be divided by 4, i.e. 512
     learning_rate = 1.e-3       # to conv layers
     lr_multiplier = 1.0         # to top fc layers
-    l1_regular = 0.0            # weight decay in L1 norm
+    l1_regular = 1.e-3          # weight decay in L1 norm
     l2_regular = 1.e-3          # L2 norm
     label_scalar = 10           # expend from [0, 1]
     flag_add_bn = True

@@ -21,9 +21,6 @@ from keras.applications import vgg16
 import numpy as np
 
 
-# TH_WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_th_dim_ordering_th_kernels_notop.h5'
-
-
 def build_2path_vgg_bodytopf_model(img_height=224,
                                    weights='imagenet',
                                    nb_fc_hidden_node=2048,
@@ -92,35 +89,119 @@ def build_2path_vgg_bodytopf_model(img_height=224,
     # Block 5
     if is_bn_enabled:
         # body
-        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_body')(body_path_x)
+        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_body',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier*2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(body_path_x)
         body_path_x = BatchNormalization(name='block5_bn1_body')(body_path_x)
         body_path_x = Activation('relu', name='block5_act1_body')(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_body')(body_path_x)
+        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_body',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(body_path_x)
         body_path_x = BatchNormalization(name='block5_bn2_body')(body_path_x)
         body_path_x = Activation('relu', name='block5_act2_body')(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_body')(body_path_x)
+        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_body',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(body_path_x)
         body_path_x = BatchNormalization(name='block5_bn3_body')(body_path_x)
         body_path_x = Activation('relu', name='block5_act3_body')(body_path_x)
         # top face
-        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_topf')(topf_path_x)
+        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_topf',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(topf_path_x)
         topf_path_x = BatchNormalization(name='block5_bn1_topf')(topf_path_x)
         topf_path_x = Activation('relu', name='block5_act1_topf')(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_topf')(topf_path_x)
+        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_topf',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(topf_path_x)
         topf_path_x = BatchNormalization(name='block5_bn2_topf')(topf_path_x)
         topf_path_x = Activation('relu', name='block5_act2_topf')(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_topf')(topf_path_x)
+        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_topf',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(topf_path_x)
         topf_path_x = BatchNormalization(name='block5_bn3_topf')(topf_path_x)
         topf_path_x = Activation('relu', name='block5_act3_topf')(topf_path_x)
         # Exception: The name "block1_conv1" is used 2 times in the model. All layer names should be unique.
     else:
         # body
-        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_body')(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_body')(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_body')(body_path_x)
+        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_body',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(body_path_x)
+        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_body',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(body_path_x)
+        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_body',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(body_path_x)
         # top face
-        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_topf')(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_topf')(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_topf')(topf_path_x)
+        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_topf',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(topf_path_x)
+        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_topf',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(topf_path_x)
+        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_topf',
+                                    W_learning_rate_multiplier=learning_rate_multiplier,
+                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
+                                    W_regularizer=l1l2(l1=l1_regularization,
+                                                       l2=l2_regularization)
+                                    if (l1_regularization > 0) or (l2_regularization > 0)
+                                    else None,
+                                    b_regularizer=None)(topf_path_x)
 
     # body: add rr pooling
     body_path_x = MaxPooling2D(pool_size=(1, (img_height / (2**4)) * 4), strides=None, name='rr_pool_body')(body_path_x)
@@ -129,12 +210,11 @@ def build_2path_vgg_bodytopf_model(img_height=224,
             nb_fc_hidden_node,
             name='fc_dense_1_body',
             W_learning_rate_multiplier=learning_rate_multiplier,
-            b_learning_rate_multiplier=learning_rate_multiplier*2,    # *2 Caffe practice
-            W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization) if (l1_regularization > 0)
-                                                                              or (l2_regularization > 0) else None,
-            b_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization) if (l1_regularization > 0)
-                                                                              or (l2_regularization > 0) else None)\
-        (body_path_x)
+            b_learning_rate_multiplier=learning_rate_multiplier*2,
+            W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
+            if (l1_regularization > 0) or (l2_regularization > 0)
+            else None,
+            b_regularizer=None)(body_path_x)
     if is_bn_enabled:
         body_path_x = BatchNormalization(name='fc_bn1_body')(body_path_x)
     body_path_x = Activation('relu', name='fc_act1_body')(body_path_x)
@@ -147,12 +227,11 @@ def build_2path_vgg_bodytopf_model(img_height=224,
             nb_fc_hidden_node/4,    # due img size 1x1 rather than 1x4 for top face, reduce dimen of fc by 4 times
             name='fc_dense_1_topf',
             W_learning_rate_multiplier=learning_rate_multiplier,
-            b_learning_rate_multiplier=learning_rate_multiplier*2,    # *2 Caffe practice
-            W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization) if (l1_regularization > 0)
-                                                                              or (l2_regularization > 0) else None,
-            b_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization) if (l1_regularization > 0)
-                                                                              or (l2_regularization > 0) else None)\
-        (topf_path_x)
+            b_learning_rate_multiplier=learning_rate_multiplier*2,
+            W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
+            if (l1_regularization > 0) or (l2_regularization > 0)
+            else None,
+            b_regularizer=None)(topf_path_x)
     if is_bn_enabled:
         topf_path_x = BatchNormalization(name='fc_bn1_topf')(topf_path_x)
     topf_path_x = Activation('relu', name='fc_act1_topf')(topf_path_x)
@@ -165,33 +244,23 @@ def build_2path_vgg_bodytopf_model(img_height=224,
               name='fc_dense_2_comb',
               W_learning_rate_multiplier=learning_rate_multiplier,
               b_learning_rate_multiplier=learning_rate_multiplier*2,
-              W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization) if (l1_regularization > 0)
-                                                                                or (l2_regularization > 0) else None,
-              b_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization) if (l1_regularization > 0)
-                                                                                or (l2_regularization > 0) else None,
+              W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
+              if (l1_regularization > 0) or (l2_regularization > 0)
+              else None,
+              b_regularizer=None,
               activation='linear')(body_topf_comb_x)
     inputs = get_source_inputs(img_input)
     model = Model(inputs, x, name='vgg_body_topf_2path_model')
 
     if weights == 'imagenet':
-        # weights_path = get_file('vgg16_weights_th_dim_ordering_th_kernels_notop.h5',
-        #                         TH_WEIGHTS_PATH_NO_TOP,
-        #                         cache_subdir='models')
         print 'loading imagenet weights ..'
-        # model.load_weights(weights_path, by_name=True)
         model = _load_imagenet_weights(model)
     elif weights == 'places':
-        # weights_path = 'models/vgg16_places365_notop_weights.h5'
         print ("places still under construction ..")
-        exit(1)
-        # print 'loading places weights ..'
-        # model.load_weights(weights_path, by_name=True)  # rest layer will be randomly initialized
+        model = _load_places365_weights(model)
     elif weights == 'office':
-        # weights_path = 'models/weights_vgg2fc256_largeset_11fzlayer_60epoch_sgdlr5e-5m10anneal20epoch_HomeOrOff_model.h5'
         print ("office still under construction ..")
         exit(1)
-        # print 'loading office weights ..'
-        # model.load_weights(weights_path, by_name=True)
     else:
         print 'NOTE: no weights loaded to the model ..'
         exit(1)
@@ -208,28 +277,38 @@ def _load_imagenet_weights(model_to_be_loaded):
     img_height = 224
     img_size = (3, img_width, img_height)
     input_tensor = Input(batch_shape=(None,) + img_size)
-    model_vgg_places365_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
+    model_vgg_imagenet_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
 
-    for layer in model_vgg_places365_notop.layers:
+    for layer in model_vgg_imagenet_notop.layers:
         if layer.get_weights().__len__() > 0:   # not pooling, activation etc.
             layer_name = layer.get_config()['name']     # get_config() returns a dictionary
             # # verify
             # old_weights_body = model_to_be_loaded.get_layer(layer_name+'_body').get_weights()
             model_to_be_loaded.get_layer(layer_name+'_body')\
-                .set_weights(model_vgg_places365_notop.get_layer(layer_name).get_weights())
+                .set_weights(model_vgg_imagenet_notop.get_layer(layer_name).get_weights())
             # old_weights_topf = model_to_be_loaded.get_layer(layer_name+'_topf').get_weights()
             model_to_be_loaded.get_layer(layer_name+'_topf')\
-                .set_weights(model_vgg_places365_notop.get_layer(layer_name).get_weights())
-            # print('{} ((body and top) x (W and b)): {} {} | {} {}'.format(layer_name,
-            #       np.array_equal(model_to_be_loaded.get_layer(layer_name+'_body').get_weights()[0],
-            #                      old_weights_body[0]),
-            #       np.array_equal(model_to_be_loaded.get_layer(layer_name+'_body').get_weights()[1],
-            #                      old_weights_body[1]),
-            #       np.array_equal(model_to_be_loaded.get_layer(layer_name+'_topf').get_weights()[0],
-            #                      old_weights_topf[0]),
-            #       np.array_equal(model_to_be_loaded.get_layer(layer_name+'_topf').get_weights()[1],
-            #                      old_weights_topf[1])))
+                .set_weights(model_vgg_imagenet_notop.get_layer(layer_name).get_weights())
     print 'finished loading imagenet parameters ..'
+    return model_to_be_loaded
+
+
+def _load_places365_weights(model_to_be_loaded):
+    img_width = 224
+    img_height = 224
+    img_size = (3, img_width, img_height)
+    input_tensor = Input(batch_shape=(None,) + img_size)
+    model_vgg_places365_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
+    model_vgg_places365_notop.load_weights('models/vgg16_places365_notop_weights_20170125.h5', by_name=True)
+
+    for layer in model_vgg_places365_notop.layers:
+        if layer.get_weights().__len__() > 0:   # not pooling, activation etc.
+            layer_name = layer.get_config()['name']
+            model_to_be_loaded.get_layer(layer_name+'_body')\
+                .set_weights(model_vgg_places365_notop.get_layer(layer_name).get_weights())
+            model_to_be_loaded.get_layer(layer_name+'_topf')\
+                .set_weights(model_vgg_places365_notop.get_layer(layer_name).get_weights())
+    print 'finished loading places365 parameters ..'
     return model_to_be_loaded
 
 
