@@ -3,6 +3,8 @@ __author__ = 'bsl'
 import keras.caffe.convert as convert
 from keras.applications import vgg16
 from keras.layers import Input
+from keras.engine.topology import get_source_inputs
+from keras.models import Model
 
 from utils.timer import Timer
 
@@ -50,7 +52,33 @@ def load_vgg16_notop_from_caffemodel(load_path='models/'):
     model_vgg_places365_notop.get_layer('block5_conv3') \
         .set_weights(model_loaded_from_caffe.get_layer('conv5_3').get_weights())
 
+    # TODO rename the model
+    # model_vgg_places365_notop.get_config().__setitem__('name', 'vgg_places365_model')
+
     return model_vgg_places365_notop
+
+
+def load_resnet152_notop_from_caffemodel(load_path='models/'):
+
+    prototxt = 'train_resnet152_places365.prototxt'
+    caffemodel = 'resnet152_places365.caffemodel'
+    debug = False   # display input shape etc. and saved to 'debug.prototxt' if True
+
+    # Note this is old style ResNet 152 with ReLU on the main path such that gradient may explode/vanish
+    with Timer("Converting caffe model .."):    # 141 secs
+        model_loaded_from_caffe = convert.caffe_to_keras(load_path+prototxt, load_path+caffemodel, debug=debug)
+
+    # cut the top layer before average pooling
+    model_loaded_from_caffe.layers.pop()    # drop 'prob' Activation layer
+    model_loaded_from_caffe.layers.pop()    # drop 'fc365' Dense layer
+    model_loaded_from_caffe.layers.pop()    # drop 'fc365_flatten' Flatten layer
+    model_loaded_from_caffe.layers.pop()    # drop 'pool5' Average Pooling layer, sub with rr pooling
+    # model.output is still: Softmax.0, revise by
+    model_loaded_from_caffe.outputs = [model_loaded_from_caffe.layers[-1].output]
+    model_loaded_from_caffe.output_layers = [model_loaded_from_caffe.layers[-1]]
+    model_loaded_from_caffe.layers[-1].outbound_nodes = []
+
+    return model_loaded_from_caffe
 
 if __name__ == "__main__":
     # verify change to Places365, for comparison
@@ -77,3 +105,10 @@ if __name__ == "__main__":
         json_file_model_stacked.write(model_vgg_places365_notop_json)
     # and weights as h5 file
     model_vgg_places365_notop.save_weights('models/vgg16_places365_notop_weights_20170125.h5')
+
+    # load ResNet152 (old style) model with Places365 parameters, no top fc layer and average activation
+    model_resnet152_places365_notop = load_resnet152_notop_from_caffemodel()
+    model_resnet152_places365_notop_json = model_resnet152_places365_notop.to_json()
+    with open('models/resnet152_places365_notop_structure_20170125.json', 'w') as json_file:
+        json_file.write(model_resnet152_places365_notop_json)
+    model_resnet152_places365_notop.save_weights('models/resnet152_places365_notop_weights_20170125.h5')
