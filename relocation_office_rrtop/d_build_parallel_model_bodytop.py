@@ -17,6 +17,7 @@ from keras.engine.topology import get_source_inputs
 from keras.models import Model
 from keras.optimizers import SGD
 from keras.applications import vgg16
+from keras.utils.visualize_util import plot
 
 import numpy as np
 
@@ -341,3 +342,7 @@ if __name__ == '__main__':
                                                    is_bn_enabled=flag_add_bn,
                                                    is_do_enabled=flag_add_do)
     model_stacked.summary()
+    plot(model_stacked,
+         'model_2path_comb_body_topf_20170125.png',
+         show_layer_names=True,
+         show_shapes=True)
