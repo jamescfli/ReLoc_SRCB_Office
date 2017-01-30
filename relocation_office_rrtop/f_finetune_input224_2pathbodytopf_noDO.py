@@ -3,7 +3,7 @@ __author__ = 'bsl'
 from relocation_office_rrtop.d_build_parallel_model_bodytop import build_2path_vgg_bodytopf_model
 
 from utils.custom_image import ImageDataGenerator
-# from utils.loss_acc_mse_history_rtplot import LossMseRTPlot
+from utils.loss_acc_mse_history_rtplot import LossMseRTPlot
 from utils.lr_annealing import LearningRateAnnealing
 from keras.callbacks import ModelCheckpoint
 
@@ -21,11 +21,11 @@ if __name__ == '__main__':
     l2_regular = 1.e+0          # L2 norm
     label_scalar = 10           # expend from [0, 1]
     flag_add_bn = True
-    flag_add_do = True
+    flag_add_do = False
     do_ratio = 0.5
     batch_size = 32             # tried 32 (224), 3850MB
-    nb_epoch = 50               # due to higher dimension of 448 img @ network bottle-neck
-    nb_epoch_annealing = 20     # anneal for every <> epochs
+    nb_epoch = 10               # due to higher dimension of 448 img @ network bottle-neck
+    nb_epoch_annealing = 3      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
     model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
@@ -68,21 +68,21 @@ if __name__ == '__main__':
     # loss_mse_rtplot = LossMseRTPlot()
     # 2) lr annealing
     annealing_schedule = LearningRateAnnealing(nb_epoch_annealing, annealing_factor)
-    # 3) checkpoint saving in case of outage
-    saver_filepath = 'relocation_office_rrtop/model_checkpoints'
-    saver_filename = 'model_latest_{epoch:03d}.h5'  # currently < 1000 epochs
-    checkpoint_saver = ModelCheckpoint(saver_filepath + os.path.sep + saver_filename,
-                                       monitor='val_mean_squared_error',
-                                       verbose=1,
-                                       save_best_only=False,
-                                       save_weights_only=True)
+    # # 3) checkpoint saving in case of outage
+    # saver_filepath = 'model_checkpoints'
+    # saver_filename = 'model_latest_{epoch:03d}.h5'  # currently < 1000 epochs
+    # checkpoint_saver = ModelCheckpoint(saver_filepath + os.path.sep + saver_filename,
+    #                                    monitor='val_mean_squared_error',
+    #                                    verbose=1,
+    #                                    save_best_only=False,
+    #                                    save_weights_only=True)
 
     history_callback = model_stacked.fit_generator(generator_train,
                                                    samples_per_epoch=nb_train_sample*aug_factor,
                                                    nb_epoch=nb_epoch,
                                                    validation_data=generator_test,
                                                    nb_val_samples=nb_valid_sample,
-                                                   callbacks=[annealing_schedule, checkpoint_saver],
+                                                   callbacks=[annealing_schedule],
                                                    verbose=1)
 
     # record

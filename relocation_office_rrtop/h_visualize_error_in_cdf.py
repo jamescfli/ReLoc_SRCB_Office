@@ -34,7 +34,7 @@ if __name__ == '__main__':
                                                    is_do_enabled=flag_add_do)
     model_path = 'models/'
     weight_filename = 'weights_input224_fc2048body_div4topf_imagenet_1125imgx10_ls10_10epoch_sgdlr1e-3m1ae3af0.1_l1reg0l2reg1e+0_reloc_model.h5'
-    model_stacked.load_weights(model_path+weight_filename)
+    model_stacked.load_weights(model_path+weight_filename, by_name=True)
     model_stacked.summary()
 
     img_width = img_height*5

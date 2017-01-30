@@ -300,7 +300,7 @@ def _load_places365_weights(model_to_be_loaded):
     img_size = (3, img_width, img_height)
     input_tensor = Input(batch_shape=(None,) + img_size)
     model_vgg_places365_notop = vgg16.VGG16(input_tensor=input_tensor, include_top=False)
-    model_vgg_places365_notop.load_weights('models/vgg16_places365_notop_weights_20170125.h5', by_name=True)
+    model_vgg_places365_notop.load_weights('relocation_office_rrtop/models/vgg16_places365_notop_weights_20170125.h5', by_name=True)
 
     for layer in model_vgg_places365_notop.layers:
         if layer.get_weights().__len__() > 0:   # not pooling, activation etc.

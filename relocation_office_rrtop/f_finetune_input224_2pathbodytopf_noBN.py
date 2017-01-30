@@ -1,5 +1,8 @@
 __author__ = 'bsl'
 
+from utils.delay_run_setter import sleeper
+sleeper(18500*10)   # 10 epochs after no DO run
+
 from relocation_office_rrtop.d_build_parallel_model_bodytop import build_2path_vgg_bodytopf_model
 
 from utils.custom_image import ImageDataGenerator
@@ -17,15 +20,15 @@ if __name__ == '__main__':
     nb_hidden_node = 2048       # where fc layer for topf will be divided by 4, i.e. 512
     learning_rate = 1.e-3       # to conv layers
     lr_multiplier = 1.0         # to top fc layers
-    l1_regular = 1.e-3          # weight decay in L1 norm
-    l2_regular = 1.e-3          # L2 norm
+    l1_regular = 0.0            # weight decay in L1 norm
+    l2_regular = 1.e+0          # L2 norm
     label_scalar = 10           # expend from [0, 1]
-    flag_add_bn = True
+    flag_add_bn = False
     flag_add_do = True
     do_ratio = 0.5
     batch_size = 32             # tried 32 (224), 3850MB
-    nb_epoch = 50               # due to higher dimension of 448 img @ network bottle-neck
-    nb_epoch_annealing = 20      # anneal for every <> epochs
+    nb_epoch = 10               # due to higher dimension of 448 img @ network bottle-neck
+    nb_epoch_annealing = 3      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
     model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
@@ -46,7 +49,7 @@ if __name__ == '__main__':
 
     datagen_train = ImageDataGenerator(rescale=1. / 255)
     generator_train = datagen_train.flow_from_directory(
-        'datasets/train_960x1920_20161125/aug_10_times_body_top_concat/',
+        'relocation_office_rrtop/datasets/train_960x1920_20161125/aug_10_times_body_top_concat/',
         target_size=(img_height, img_width),
         batch_size=batch_size,
         shuffle=True,
@@ -56,7 +59,7 @@ if __name__ == '__main__':
     nb_valid_sample = 2000
     datagen_valid = ImageDataGenerator(rescale=1. / 255)
     generator_test = datagen_valid.flow_from_directory(
-        'datasets/valid_480x2400_concat_nb2000_20161215/concat/',
+        'relocation_office_rrtop/datasets/valid_480x2400_concat_nb2000_20161215/concat/',
         target_size=(img_height, img_width),
         batch_size=batch_size,
         shuffle=False,
@@ -93,7 +96,7 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'training_procedure/convergence_input{}_fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
+        'relocation_office_rrtop/training_procedure/convergence_input{}_fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
             .format(img_height,
                     nb_hidden_node,
                     initial_weights,
@@ -109,7 +112,7 @@ if __name__ == '__main__':
         record, delimiter=',')
 
     model_stacked.save_weights(
-        'models/weights_input{}_fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
+        'relocation_office_rrtop/models/weights_input{}_fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
             .format(img_height,
                     nb_hidden_node,
                     initial_weights,
