@@ -14,14 +14,13 @@ if __name__ == '__main__':
     initial_weights = 'imagenet'
     nb_hidden_node = 2048  # where fc layer for topf will be divided by 4, i.e. 512
     learning_rate = 1.e-3  # to conv layers
-    lr_multiplier = 1.0  # to top fc layers
-    l1_regular = 1.e-3  # weight decay in L1 norm
-    l2_regular = 1.e-3  # L2 norm
-    label_scalar = 10  # expend from [0, 1]
+    lr_multiplier = 1.0    # to top fc layers
+    l1_regular = 0.0       # weight decay in L1 norm
+    l2_regular = 1.e+0     # L2 norm
+    label_scalar = 10      # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = True
     do_ratio = 0.5
-    batch_size = 32  # tried 32 (224)
 
     model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
                                                    weights=initial_weights,
@@ -34,7 +33,7 @@ if __name__ == '__main__':
                                                    is_bn_enabled=flag_add_bn,
                                                    is_do_enabled=flag_add_do)
     model_path = 'models/'
-    weight_filename = 'weights_input224_fc2048body_div4topf_imagenet_1125imgx10_ls10_10epoch_sgdlr1e-3m1ae3af0.1_l1reg1e-3l2reg1e-3_reloc_model.h5'
+    weight_filename = 'weights_input224_fc2048body_div4topf_imagenet_1125imgx10_ls10_10epoch_sgdlr1e-3m1ae3af0.1_l1reg0l2reg1e+0_reloc_model.h5'
     model_stacked.load_weights(model_path+weight_filename)
     model_stacked.summary()
 
