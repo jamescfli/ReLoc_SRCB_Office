@@ -83,7 +83,7 @@ class ConvergencePlot():
 
 if __name__ == '__main__':
     path_name = '../relocation_office_rrtop/training_procedure/'
-    file_name_largeset_2fc2048 = 'convergence_input224_fc2048body_div4topf_imagenet_1125imgx10_ls10_10epoch_sgdlr1e-3m1ae3af0.1_l1reg0l2reg1e+0_reloc_model.csv'
+    file_name_largeset_2fc2048 = 'convergence_input224_fc2048body_div4topf_noDO_imagenet_1125imgx10_ls10_10epoch_sgdlr1e-3m1ae3af0.1_l1reg0l2reg1e+0_reloc_model.csv'
     columns = ['epoch', 'train_loss', 'valid_loss', 'train_mse', 'valid_mse']
     test_plot_largeset_2fc2048 = ConvergencePlot(filename=path_name + file_name_largeset_2fc2048,
                                                  column_list=columns)

@@ -1,7 +1,7 @@
 __author__ = 'bsl'
 
-from utils.delay_run_setter import sleeper
-sleeper(18500*10)   # 10 epochs after no DO run
+# from utils.delay_run_setter import sleeper
+# sleeper(18500*10)   # 10 epochs after no DO run
 
 from relocation_office_rrtop.d_build_parallel_model_bodytop import build_2path_vgg_bodytopf_model
 

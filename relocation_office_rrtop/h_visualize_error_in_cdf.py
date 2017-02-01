@@ -19,7 +19,7 @@ if __name__ == '__main__':
     l2_regular = 1.e+0     # L2 norm
     label_scalar = 10      # expend from [0, 1]
     flag_add_bn = True
-    flag_add_do = True
+    flag_add_do = False
     do_ratio = 0.5
 
     model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
@@ -33,7 +33,7 @@ if __name__ == '__main__':
                                                    is_bn_enabled=flag_add_bn,
                                                    is_do_enabled=flag_add_do)
     model_path = 'models/'
-    weight_filename = 'weights_input224_fc2048body_div4topf_imagenet_1125imgx10_ls10_10epoch_sgdlr1e-3m1ae3af0.1_l1reg0l2reg1e+0_reloc_model.h5'
+    weight_filename = 'weights_input224_fc2048body_div4topf_noDO_imagenet_1125imgx10_ls10_10epoch_sgdlr1e-3m1ae3af0.1_l1reg0l2reg1e+0_reloc_model.h5'
     model_stacked.load_weights(model_path+weight_filename, by_name=True)
     model_stacked.summary()
 
