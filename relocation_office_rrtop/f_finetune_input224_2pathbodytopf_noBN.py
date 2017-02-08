@@ -96,7 +96,7 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'relocation_office_rrtop/training_procedure/convergence_input{}_fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
+        'relocation_office_rrtop/training_procedure/convergence_input{}_fc{}body_div4topf_noBN_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
             .format(img_height,
                     nb_hidden_node,
                     initial_weights,
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         record, delimiter=',')
 
     model_stacked.save_weights(
-        'relocation_office_rrtop/models/weights_input{}_fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
+        'relocation_office_rrtop/models/weights_input{}_fc{}body_div4topf_noBN_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
             .format(img_height,
                     nb_hidden_node,
                     initial_weights,
