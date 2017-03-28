@@ -22,7 +22,7 @@ from keras.utils.visualize_util import plot
 import numpy as np
 
 
-def build_2path_vgg_bodytopf_model(img_height=224,
+def build_2path_vgg_bodytopf_model(img_height=448,
                                    weights='imagenet',
                                    nb_fc_hidden_node=2048,
                                    dropout_ratio=0.5,
@@ -67,6 +67,11 @@ def build_2path_vgg_bodytopf_model(img_height=224,
     body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block4_conv2_body', trainable=False)(body_path_x)
     body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block4_conv3_body', trainable=False)(body_path_x)
     body_path_x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool_body', trainable=False)(body_path_x)
+    # Block 5
+    body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_body', trainable=False)(body_path_x)
+    body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_body', trainable=False)(body_path_x)
+    body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_body', trainable=False)(body_path_x)
+    body_path_x = MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool_body')(body_path_x)
 
     # top face
     topf_path_x = Convolution2D(64, 3, 3, activation='relu', border_mode='same', name='block1_conv1_topf', trainable=False)(topf_path_x)
@@ -88,161 +93,179 @@ def build_2path_vgg_bodytopf_model(img_height=224,
     topf_path_x = MaxPooling2D((2, 2), strides=(2, 2), name='block4_pool_topf', trainable=False)(topf_path_x)
 
     # Block 5
-    if is_bn_enabled:
-        # body
-        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_body',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier*2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(body_path_x)
-        body_path_x = BatchNormalization(name='block5_bn1_body')(body_path_x)
-        body_path_x = Activation('relu', name='block5_act1_body')(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_body',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(body_path_x)
-        body_path_x = BatchNormalization(name='block5_bn2_body')(body_path_x)
-        body_path_x = Activation('relu', name='block5_act2_body')(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_body',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(body_path_x)
-        body_path_x = BatchNormalization(name='block5_bn3_body')(body_path_x)
-        body_path_x = Activation('relu', name='block5_act3_body')(body_path_x)
-        # top face
-        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_topf',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(topf_path_x)
-        topf_path_x = BatchNormalization(name='block5_bn1_topf')(topf_path_x)
-        topf_path_x = Activation('relu', name='block5_act1_topf')(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_topf',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(topf_path_x)
-        topf_path_x = BatchNormalization(name='block5_bn2_topf')(topf_path_x)
-        topf_path_x = Activation('relu', name='block5_act2_topf')(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_topf',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(topf_path_x)
-        topf_path_x = BatchNormalization(name='block5_bn3_topf')(topf_path_x)
-        topf_path_x = Activation('relu', name='block5_act3_topf')(topf_path_x)
-        # Exception: The name "block1_conv1" is used 2 times in the model. All layer names should be unique.
-    else:
-        # body
-        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_body',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_body',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(body_path_x)
-        body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_body',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(body_path_x)
-        # top face
-        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_topf',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_topf',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(topf_path_x)
-        topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_topf',
-                                    W_learning_rate_multiplier=learning_rate_multiplier,
-                                    b_learning_rate_multiplier=learning_rate_multiplier * 2,
-                                    W_regularizer=l1l2(l1=l1_regularization,
-                                                       l2=l2_regularization)
-                                    if (l1_regularization > 0) or (l2_regularization > 0)
-                                    else None,
-                                    b_regularizer=None)(topf_path_x)
+    topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_topf', trainable=False)(topf_path_x)
+    topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_topf', trainable=False)(topf_path_x)
+    topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_topf', trainable=False)(topf_path_x)
+    topf_path_x = MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool_topf')(topf_path_x)
+    # if is_bn_enabled:
+    #     # body
+    #     body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_body',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier*2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(body_path_x)
+    #     body_path_x = BatchNormalization(name='block5_bn1_body')(body_path_x)
+    #     body_path_x = Activation('relu', name='block5_act1_body')(body_path_x)
+    #     body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_body',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(body_path_x)
+    #     body_path_x = BatchNormalization(name='block5_bn2_body')(body_path_x)
+    #     body_path_x = Activation('relu', name='block5_act2_body')(body_path_x)
+    #     body_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_body',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(body_path_x)
+    #     body_path_x = BatchNormalization(name='block5_bn3_body')(body_path_x)
+    #     body_path_x = Activation('relu', name='block5_act3_body')(body_path_x)
+    #     # top face
+    #     topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv1_topf',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(topf_path_x)
+    #     topf_path_x = BatchNormalization(name='block5_bn1_topf')(topf_path_x)
+    #     topf_path_x = Activation('relu', name='block5_act1_topf')(topf_path_x)
+    #     topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv2_topf',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(topf_path_x)
+    #     topf_path_x = BatchNormalization(name='block5_bn2_topf')(topf_path_x)
+    #     topf_path_x = Activation('relu', name='block5_act2_topf')(topf_path_x)
+    #     topf_path_x = Convolution2D(512, 3, 3, border_mode='same', name='block5_conv3_topf',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(topf_path_x)
+    #     topf_path_x = BatchNormalization(name='block5_bn3_topf')(topf_path_x)
+    #     topf_path_x = Activation('relu', name='block5_act3_topf')(topf_path_x)
+    #     # Exception: The name "block1_conv1" is used 2 times in the model. All layer names should be unique.
+    # else:
+    #     # body
+    #     body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_body',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(body_path_x)
+    #     body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_body',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(body_path_x)
+    #     body_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_body',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(body_path_x)
+    #     # top face
+    #     topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv1_topf',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(topf_path_x)
+    #     topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv2_topf',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(topf_path_x)
+    #     topf_path_x = Convolution2D(512, 3, 3, activation='relu', border_mode='same', name='block5_conv3_topf',
+    #                                 W_learning_rate_multiplier=learning_rate_multiplier,
+    #                                 b_learning_rate_multiplier=learning_rate_multiplier * 2,
+    #                                 W_regularizer=l1l2(l1=l1_regularization,
+    #                                                    l2=l2_regularization)
+    #                                 if (l1_regularization > 0) or (l2_regularization > 0)
+    #                                 else None,
+    #                                 b_regularizer=None)(topf_path_x)
 
     # body: add rr pooling
-    body_path_x = MaxPooling2D(pool_size=(1, (img_height / (2**4)) * 4), strides=None, name='rr_pool_body')(body_path_x)
+    body_path_x = MaxPooling2D(pool_size=(1, (img_height / (2**5)) * 4),
+                               strides=None,
+                               name='rr_pool_body')(body_path_x)
     body_path_x = Flatten(name='flatten_body')(body_path_x)     # only one flatten layer so far, no index
-    body_path_x = Dense(
-            nb_fc_hidden_node,
-            name='fc_dense_1_body',
-            W_learning_rate_multiplier=learning_rate_multiplier,
-            b_learning_rate_multiplier=learning_rate_multiplier*2,
-            W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
-            if (l1_regularization > 0) or (l2_regularization > 0)
-            else None,
-            b_regularizer=None)(body_path_x)
-    if is_bn_enabled:
-        body_path_x = BatchNormalization(name='fc_bn1_body')(body_path_x)
-    body_path_x = Activation('relu', name='fc_act1_body')(body_path_x)
-    if is_do_enabled:
-        body_path_x = Dropout(dropout_ratio, name='fc_do_1_body')(body_path_x)
-    # top face: normal max pooling
-    topf_path_x = MaxPooling2D((2, 2), strides=(2, 2), name='block5_pool_topf')(topf_path_x)
-    topf_path_x = Flatten(name='flatten_topf')(topf_path_x)
-    topf_path_x = Dense(
-            nb_fc_hidden_node/4,    # due img size 1x1 rather than 1x4 for top face, reduce dimen of fc by 4 times
-            name='fc_dense_1_topf',
-            W_learning_rate_multiplier=learning_rate_multiplier,
-            b_learning_rate_multiplier=learning_rate_multiplier*2,
-            W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
-            if (l1_regularization > 0) or (l2_regularization > 0)
-            else None,
-            b_regularizer=None)(topf_path_x)
-    if is_bn_enabled:
-        topf_path_x = BatchNormalization(name='fc_bn1_topf')(topf_path_x)
-    topf_path_x = Activation('relu', name='fc_act1_topf')(topf_path_x)
-    if is_do_enabled:
-        topf_path_x = Dropout(dropout_ratio, name='fc_do_1_topf')(topf_path_x)
 
-    body_topf_comb_x = merge([body_path_x, topf_path_x], mode='concat', concat_axis=1, name='concat_body_and_topf')
+    # top face: one max pooling to (1 x 1 x nb_kernels)
+    topf_path_x = MaxPooling2D(((img_height / (2**5)), (img_height / (2**5))),
+                               strides=None,
+                               name='block5_1x1pool_topf')(topf_path_x)
+    topf_path_x = Flatten(name='flatten_topf')(topf_path_x)
+
+    body_topf_comb_x = merge([body_path_x, topf_path_x],
+                             mode='concat',
+                             concat_axis=1,
+                             name='concat_body_and_topf')
+
+    # 2 Dense layers
+    # layer 1
+    body_topf_comb_x = Dense(
+        nb_fc_hidden_node,
+        name='fc_dense_1_body_topf_comb',
+        activation='linear',
+        W_learning_rate_multiplier=learning_rate_multiplier,
+        b_learning_rate_multiplier=learning_rate_multiplier * 2,
+        W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
+        if (l1_regularization > 0) or (l2_regularization > 0)
+        else None,
+        b_regularizer=None)(body_topf_comb_x)
+    if is_bn_enabled:
+        body_topf_comb_x = BatchNormalization(name='fc_bn1_body_topf_comb')(body_topf_comb_x)
+    body_topf_comb_x = Activation('relu', name='fc_act1_body_topf_comb')(body_topf_comb_x)
+    if is_do_enabled:
+        body_topf_comb_x = Dropout(dropout_ratio, name='fc_do_1_body_topf_comb')(body_topf_comb_x)
+    # layer 2
+    body_topf_comb_x = Dense(
+        nb_fc_hidden_node,
+        name='fc_dense_2_body_topf_comb',
+        activation='linear',
+        W_learning_rate_multiplier=learning_rate_multiplier,
+        b_learning_rate_multiplier=learning_rate_multiplier * 2,
+        W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
+        if (l1_regularization > 0) or (l2_regularization > 0)
+        else None,
+        b_regularizer=None)(body_topf_comb_x)
+    if is_bn_enabled:
+        body_topf_comb_x = BatchNormalization(name='fc_bn2_body_topf_comb')(body_topf_comb_x)
+    body_topf_comb_x = Activation('relu', name='fc_act2_body_topf_comb')(body_topf_comb_x)
+    if is_do_enabled:
+        body_topf_comb_x = Dropout(dropout_ratio, name='fc_do_2_body_topf_comb')(body_topf_comb_x)
 
     x = Dense(2,
-              name='fc_dense_2_comb',
+              name='fc_dense_3_body_topf_comb',
               W_learning_rate_multiplier=learning_rate_multiplier,
               b_learning_rate_multiplier=learning_rate_multiplier*2,
               W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
@@ -315,7 +338,7 @@ def _load_places365_weights(model_to_be_loaded):
 
 if __name__ == '__main__':
     # build model from scratch
-    img_height = 224
+    img_height = 448
     initial_weights = 'imagenet'
     nb_hidden_node = 2048
     learning_rate = 1e-3        # to conv layers
@@ -343,6 +366,6 @@ if __name__ == '__main__':
                                                    is_do_enabled=flag_add_do)
     model_stacked.summary()
     plot(model_stacked,
-         'model_2path_comb_body_topf_20170125.png',
+         './models/model_2path_comb_body_topf_20170328.png',
          show_layer_names=True,
          show_shapes=True)

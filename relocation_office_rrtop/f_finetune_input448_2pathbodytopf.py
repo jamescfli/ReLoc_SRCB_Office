@@ -12,26 +12,26 @@ import os
 
 
 if __name__ == '__main__':
-    img_height = 224
+    img_height = 448
     initial_weights = 'imagenet'
     nb_hidden_node = 2048       # where fc layer for topf will be divided by 4, i.e. 512
-    learning_rate = 1.e-2       # to conv layers
+    learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 0.0            # weight decay in L1 norm
     l2_regular = 1.e+0          # L2 norm
-    label_scalar = 10           # expend from [0, 1]
+    label_scalar = 1            # expend from [0, 1]
     flag_add_bn = True
-    flag_add_do = True
-    do_ratio = 0.5
-    batch_size = 32             # tried 32 (224), 3850MB
-    nb_epoch = 10               # due to higher dimension of 448 img @ network bottle-neck
-    nb_epoch_annealing = 2      # anneal for every <> epochs
+    flag_add_do = False
+    # do_ratio = 0.5
+    batch_size = 8              # tried 32 (224), 3850MB
+    nb_epoch = 2                # due to higher dimension of 448 img @ network bottle-neck
+    nb_epoch_annealing = 1      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
     model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
                                                    weights=initial_weights,
                                                    nb_fc_hidden_node=nb_hidden_node,
-                                                   dropout_ratio=do_ratio,
+                                                   # dropout_ratio=do_ratio,
                                                    global_learning_rate=learning_rate,
                                                    learning_rate_multiplier=lr_multiplier,
                                                    l1_regularization=l1_regular,
