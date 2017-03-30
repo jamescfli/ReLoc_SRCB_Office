@@ -47,7 +47,7 @@ def build_2path_vgg_bodytopf_model(img_height=448,
     body_path_x = Cropping2D(cropping=((0,0), (0,img_height)),  name='cut_body_input')(img_input) # cut right hxh patch
     topf_path_x = Cropping2D(cropping=((0,0), (img_height*4,0)), name='cut_topf_input')(img_input) # cut left hx4h patch
 
-    # freeze Block 1~4 in VGG
+    # freeze Block 1~5 in VGG
     # body
     #   block 1
     body_path_x = Convolution2D(64, 3, 3, activation='relu', border_mode='same', name='block1_conv1_body', trainable=False)(body_path_x)
