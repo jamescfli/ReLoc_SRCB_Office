@@ -1,9 +1,8 @@
 __author__ = 'bsl'
 
-from relocation_office_rrtop.d_build_parallel_model_bodytop import build_2path_vgg_bodytopf_model
+from relocation_office_rrtop.d_build_singlepath_model_bodyonly import build_1path_vgg_bodyonly_model
 
 from utils.custom_image import ImageDataGenerator
-# from utils.loss_acc_mse_history_rtplot import LossMseRTPlot
 from utils.lr_annealing import LearningRateAnnealing
 from keras.callbacks import ModelCheckpoint
 
@@ -15,23 +14,23 @@ if __name__ == '__main__':
     img_height = 448
     initial_weights = 'imagenet'
     nb_hidden_dense_layer = 2   # nb of hidden fc layers, output dense excluded
-    nb_hidden_node = 2048       # where fc layer for topf will be divided by 4, i.e. 512
-    learning_rate = 1e-3        # to conv layers
+    nb_hidden_node = 2048       # hidden node number for each fc layer
+    learning_rate = 1e-2        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
     l1_regular = 0.0            # weight decay in L1 norm
-    l2_regular = 1.e+0          # L2 norm
+    l2_regular = 0.0            # L2 norm
     label_scalar = 1            # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = False
     # do_ratio = 0.5
     batch_size = 8              # tried 32 (224), 3850MB
-    nb_epoch = 2                # due to higher dimension of 448 img @ network bottle-neck
-    nb_epoch_annealing = 1      # anneal for every <> epochs
+    nb_epoch = 8                # due to higher dimension of 448 img @ network bottle-neck
+    nb_epoch_annealing = 4      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
-    model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
+    model_stacked = build_1path_vgg_bodyonly_model(img_height=img_height,
                                                    weights=initial_weights,
-                                                   nb_fc_hidden_layer=nb_hidden_dense_layer,
+                                                   nb_fc_hidden_layer= nb_hidden_dense_layer,
                                                    nb_fc_hidden_node=nb_hidden_node,
                                                    # dropout_ratio=do_ratio,
                                                    global_learning_rate=learning_rate,
@@ -95,7 +94,7 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'relocation_office_rrtop/training_procedure/convergence_input{}_{}fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
+        'relocation_office_rrtop/training_procedure/convergence_input{}_{}fc{}bodyonly_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
             .format(img_height,
                     nb_hidden_dense_layer,
                     nb_hidden_node,
@@ -112,7 +111,7 @@ if __name__ == '__main__':
         record, delimiter=',')
 
     model_stacked.save_weights(
-        'relocation_office_rrtop/models/weights_input{}_{}fc{}body_div4topf_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
+        'relocation_office_rrtop/models/weights_input{}_{}fc{}bodyonly_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
             .format(img_height,
                     nb_hidden_dense_layer,
                     nb_hidden_node,

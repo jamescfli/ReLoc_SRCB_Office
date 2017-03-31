@@ -24,6 +24,7 @@ import numpy as np
 
 def build_2path_vgg_bodytopf_model(img_height=448,
                                    weights='imagenet',
+                                   nb_fc_hidden_layer=2,
                                    nb_fc_hidden_node=2048,
                                    dropout_ratio=0.5,
                                    global_learning_rate=1e-5,
@@ -230,49 +231,33 @@ def build_2path_vgg_bodytopf_model(img_height=448,
                              concat_axis=1,
                              name='concat_body_and_topf')
 
-    # 2 Dense layers
-    # layer 1
-    body_topf_comb_x = Dense(
-        nb_fc_hidden_node,
-        name='fc_dense_1_body_topf_comb',
-        activation='linear',
-        W_learning_rate_multiplier=learning_rate_multiplier,
-        b_learning_rate_multiplier=learning_rate_multiplier * 2,
-        W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
-        if (l1_regularization > 0) or (l2_regularization > 0)
-        else None,
-        b_regularizer=None)(body_topf_comb_x)
-    if is_bn_enabled:
-        body_topf_comb_x = BatchNormalization(name='fc_bn1_body_topf_comb')(body_topf_comb_x)
-    body_topf_comb_x = Activation('relu', name='fc_act1_body_topf_comb')(body_topf_comb_x)
-    if is_do_enabled:
-        body_topf_comb_x = Dropout(dropout_ratio, name='fc_do_1_body_topf_comb')(body_topf_comb_x)
-    # layer 2
-    body_topf_comb_x = Dense(
-        nb_fc_hidden_node,
-        name='fc_dense_2_body_topf_comb',
-        activation='linear',
-        W_learning_rate_multiplier=learning_rate_multiplier,
-        b_learning_rate_multiplier=learning_rate_multiplier * 2,
-        W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
-        if (l1_regularization > 0) or (l2_regularization > 0)
-        else None,
-        b_regularizer=None)(body_topf_comb_x)
-    if is_bn_enabled:
-        body_topf_comb_x = BatchNormalization(name='fc_bn2_body_topf_comb')(body_topf_comb_x)
-    body_topf_comb_x = Activation('relu', name='fc_act2_body_topf_comb')(body_topf_comb_x)
-    if is_do_enabled:
-        body_topf_comb_x = Dropout(dropout_ratio, name='fc_do_2_body_topf_comb')(body_topf_comb_x)
+    # hidden dense layers, default = 2
+    for i in np.arange(nb_fc_hidden_layer):
+        body_topf_comb_x = Dense(
+            nb_fc_hidden_node,
+            name='fc_dense{}_body_topf_comb'.format(i+1),
+            activation='linear',    # default is linear
+            W_learning_rate_multiplier=learning_rate_multiplier,
+            b_learning_rate_multiplier=learning_rate_multiplier * 2,
+            W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
+            if (l1_regularization > 0) or (l2_regularization > 0)
+            else None,
+            b_regularizer=None)(body_topf_comb_x)
+        if is_bn_enabled:
+            body_topf_comb_x = BatchNormalization(name='fc_bn{}_body_topf_comb'.format(i+1))(body_topf_comb_x)
+        body_topf_comb_x = Activation('relu', name='fc_act{}_body_topf_comb'.format(i+1))(body_topf_comb_x)
+        if is_do_enabled:
+            body_topf_comb_x = Dropout(dropout_ratio, name='fc_do{}_body_topf_comb'.format(i+1))(body_topf_comb_x)
 
     x = Dense(2,
-              name='fc_dense_3_body_topf_comb',
+              name='fc_dense{}_body_topf_comb'.format(nb_fc_hidden_layer + 1),
+              activation='linear',
               W_learning_rate_multiplier=learning_rate_multiplier,
               b_learning_rate_multiplier=learning_rate_multiplier*2,
               W_regularizer=l1l2(l1=l1_regularization, l2=l2_regularization)
               if (l1_regularization > 0) or (l2_regularization > 0)
               else None,
-              b_regularizer=None,
-              activation='linear')(body_topf_comb_x)
+              b_regularizer=None)(body_topf_comb_x)
     inputs = get_source_inputs(img_input)
     model = Model(inputs, x, name='vgg_body_topf_2path_model')
 
@@ -340,6 +325,7 @@ if __name__ == '__main__':
     # build model from scratch
     img_height = 448
     initial_weights = 'imagenet'
+    nb_hidden_dense_layer = 2   # nb of hidden fc layers, output dense excluded
     nb_hidden_node = 2048
     learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
@@ -356,6 +342,7 @@ if __name__ == '__main__':
     np.random.seed(7)           # to repeat results
     model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
                                                    weights=initial_weights,
+                                                   nb_fc_hidden_layer=nb_hidden_dense_layer,
                                                    nb_fc_hidden_node=nb_hidden_node,
                                                    dropout_ratio=do_ratio,
                                                    global_learning_rate=learning_rate,
@@ -366,6 +353,6 @@ if __name__ == '__main__':
                                                    is_do_enabled=flag_add_do)
     model_stacked.summary()
     plot(model_stacked,
-         './models/model_2path_comb_body_topf_20170328.png',
+         './models/model_2path_comb_body_topf_20170331.png',
          show_layer_names=True,
          show_shapes=True)

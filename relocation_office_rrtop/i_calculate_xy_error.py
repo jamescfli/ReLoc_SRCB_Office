@@ -1,5 +1,6 @@
 __author__ = 'bsl'
 
+from relocation_office_rrtop.d_build_singlepath_model_bodyonly import build_1path_vgg_bodyonly_model
 from relocation_office_rrtop.d_build_parallel_model_bodytop import build_2path_vgg_bodytopf_model
 from utils.custom_image import ImageDataGenerator
 import numpy as np
@@ -7,36 +8,56 @@ import matplotlib.pyplot as plt
 from utils.timer import Timer
 
 
-def generate(dataset_split):
+def generate(train_valid_split = None, nb_path_for_model = None):
     img_height = 448
     initial_weights = 'imagenet'
-    nb_hidden_node = 2048  # where fc layer for topf will be divided by 4, i.e. 512
-    learning_rate = 1e-3  # to conv layers
-    lr_multiplier = 1.0  # to top fc layers
-    l1_regular = 0.0  # weight decay in L1 norm
-    l2_regular = 1.e+0  # L2 norm
-    label_scalar = 1  # expend from [0, 1]
+    nb_hidden_dense_layer = 2   # nb of hidden fc layers, output dense excluded
+    nb_hidden_node = 2048       # where fc layer for topf will be divided by 4, i.e. 512
+    learning_rate = 1e-3        # to conv layers
+    lr_multiplier = 1.0         # to top fc layers
+    l1_regular = 0.0            # weight decay in L1 norm
+    l2_regular = 1.e+0          # L2 norm
+    label_scalar = 1            # expend from [0, 1]
     flag_add_bn = True
     flag_add_do = False
-    np.random.seed(7)  # to repeat results
-    model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
-                                                   weights=initial_weights,
-                                                   nb_fc_hidden_node=nb_hidden_node,
-                                                   global_learning_rate=learning_rate,
-                                                   learning_rate_multiplier=lr_multiplier,
-                                                   l1_regularization=l1_regular,
-                                                   l2_regularization=l2_regular,
-                                                   is_bn_enabled=flag_add_bn,
-                                                   is_do_enabled=flag_add_do)
-    model_path = './models/'
-    weight_filename = 'weights_input448_fc2048bodyonly_imagenet_1125imgx10_ls1_3epoch_sgdlr1e-3_l1reg0l2reg1_reloc_model.h5'
-    model_stacked.load_weights(model_path + weight_filename, by_name=True)
+    np.random.seed(7)           # to repeat results
+
+    if nb_path_for_model == '1':
+        model_stacked = build_1path_vgg_bodyonly_model(img_height=img_height,
+                                                       weights=initial_weights,
+                                                       nb_fc_hidden_layer=nb_hidden_dense_layer,
+                                                       nb_fc_hidden_node=nb_hidden_node,
+                                                       global_learning_rate=learning_rate,
+                                                       learning_rate_multiplier=lr_multiplier,
+                                                       l1_regularization=l1_regular,
+                                                       l2_regularization=l2_regular,
+                                                       is_bn_enabled=flag_add_bn,
+                                                       is_do_enabled=flag_add_do)
+        model_path = './models/'
+        weight_filename = 'weights_input448_fc2048bodyonly_imagenet_1125imgx10_ls1_4epoch_sgdlr1e-3_l1reg0l2reg1_reloc_model.h5'
+        model_stacked.load_weights(model_path + weight_filename, by_name=True)
+    elif nb_path_for_model == '2':
+        model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
+                                                       weights=initial_weights,
+                                                       nb_fc_hidden_layer=nb_hidden_dense_layer,
+                                                       nb_fc_hidden_node=nb_hidden_node,
+                                                       global_learning_rate=learning_rate,
+                                                       learning_rate_multiplier=lr_multiplier,
+                                                       l1_regularization=l1_regular,
+                                                       l2_regularization=l2_regular,
+                                                       is_bn_enabled=flag_add_bn,
+                                                       is_do_enabled=flag_add_do)
+        model_path = './models/'
+        weight_filename = 'weights_input448_fc2048bodytopf_imagenet_1125imgx10_ls1_2epoch_sgdlr1e-3m1ae1af01_l1reg0l2reg1_reloc_model.h5'
+        model_stacked.load_weights(model_path + weight_filename, by_name=True)
+    else:
+        raise ValueError("number of stem paths is either '1' or '2'")
     model_stacked.summary()
 
     img_width = img_height * 5
     batch_size = 1
 
-    if dataset_split == 'train':
+    if train_valid_split == 'train':
         nb_train_sample = 15182  # take the first part of x10 augmentation
         datagen_train = ImageDataGenerator(rescale=1. / 255)
         generator_train = datagen_train.flow_from_directory(
@@ -53,7 +74,7 @@ def generate(dataset_split):
         # .. 1722 sec for 15182 448 img
         print "train pos xy shape: {}".format(train_pos.shape)
         np.save(open('predicted_data/train_position_result_w20161125img.npy', 'w'), train_pos)
-    elif dataset_split == 'valid':
+    elif train_valid_split == 'valid':
         nb_valid_sample = 2000
         datagen_valid = ImageDataGenerator(rescale=1. / 255)
         generator_valid = datagen_valid.flow_from_directory('datasets/valid_480x2400_concat_nb2000_20161215/concat/',
@@ -96,8 +117,6 @@ def visualize(dataset_split):
 
 if __name__ == '__main__':
     flag_dataset_split = 'train'  # train or valid
-    # generate(flag_dataset_split)
-    visualize(flag_dataset_split)
-
-
-
+    flag_1or2_path_model = '1'
+    generate(train_valid_split=flag_dataset_split, nb_path_for_model=flag_1or2_path_model)
+    # visualize(flag_dataset_split)
