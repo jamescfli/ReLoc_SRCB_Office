@@ -34,7 +34,7 @@ def generate(train_valid_split = None, nb_path_for_model = None):
                                                        is_bn_enabled=flag_add_bn,
                                                        is_do_enabled=flag_add_do)
         model_path = './models/'
-        weight_filename = 'weights_input448_fc2048bodyonly_imagenet_1125imgx10_ls1_4epoch_sgdlr1e-3_l1reg0l2reg1_reloc_model.h5'
+        weight_filename = 'weights_input448_fc2048bodyonly_imagenet_1125imgx10_ls1_6epoch_sgdlr1e-2m1ae4af01_l1reg0l2reg0_reloc_model.h5'
         model_stacked.load_weights(model_path + weight_filename, by_name=True)
     elif nb_path_for_model == '2':
         model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
@@ -118,5 +118,5 @@ def visualize(dataset_split):
 if __name__ == '__main__':
     flag_dataset_split = 'train'  # train or valid
     flag_1or2_path_model = '1'
-    generate(train_valid_split=flag_dataset_split, nb_path_for_model=flag_1or2_path_model)
-    # visualize(flag_dataset_split)
+    # generate(train_valid_split=flag_dataset_split, nb_path_for_model=flag_1or2_path_model)
+    visualize(flag_dataset_split)
