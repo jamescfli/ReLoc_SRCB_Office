@@ -15,6 +15,7 @@ def generate(train_valid_split = None, nb_path_for_model = None):
     nb_hidden_node = 2048       # where fc layer for topf will be divided by 4, i.e. 512
     learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
+    w_decay = 5e-5              # 1.58e-4 = 3 epoch 0.1 annealing
     l1_regular = 0.0            # weight decay in L1 norm
     l2_regular = 1.e+0          # L2 norm
     label_scalar = 1            # expend from [0, 1]
@@ -29,13 +30,18 @@ def generate(train_valid_split = None, nb_path_for_model = None):
                                                        nb_fc_hidden_node=nb_hidden_node,
                                                        global_learning_rate=learning_rate,
                                                        learning_rate_multiplier=lr_multiplier,
+                                                       weight_decay = w_decay,
                                                        l1_regularization=l1_regular,
                                                        l2_regularization=l2_regular,
                                                        is_bn_enabled=flag_add_bn,
                                                        is_do_enabled=flag_add_do)
         model_path = './models/'
-        weight_filename = 'weights_input448_fc2048bodyonly_imagenet_1125imgx10_ls1_6epoch_sgdlr1e-2m1ae4af01_l1reg0l2reg0_reloc_model.h5'
-        model_stacked.load_weights(model_path + weight_filename, by_name=True)
+        # # best @ epoch 6
+        # weight_filename = 'weights_input448_fc2048bodyonly_imagenet_1125imgx10_ls1_6epoch_sgdlr1e-2m1ae4af01_l1reg0l2reg0_reloc_model.h5'
+        # # last @ epoch 8
+        # weight_filename = 'weights_input448_fc2048bodyonly_imagenet_1125imgx10_ls1_8epoch_sgdlr1e-2m1ae4af01_l1reg0l2reg0_reloc_model.h5'
+        weight_filename = 'weights_input448_2fc2048bodyonly_load_test_model.h5'
+        model_stacked.load_weights(model_path + weight_filename)    # by_name = False by default
     elif nb_path_for_model == '2':
         model_stacked = build_2path_vgg_bodytopf_model(img_height=img_height,
                                                        weights=initial_weights,
@@ -43,13 +49,14 @@ def generate(train_valid_split = None, nb_path_for_model = None):
                                                        nb_fc_hidden_node=nb_hidden_node,
                                                        global_learning_rate=learning_rate,
                                                        learning_rate_multiplier=lr_multiplier,
+                                                       weight_decay = w_decay,
                                                        l1_regularization=l1_regular,
                                                        l2_regularization=l2_regular,
                                                        is_bn_enabled=flag_add_bn,
                                                        is_do_enabled=flag_add_do)
         model_path = './models/'
         weight_filename = 'weights_input448_fc2048bodytopf_imagenet_1125imgx10_ls1_2epoch_sgdlr1e-3m1ae1af01_l1reg0l2reg1_reloc_model.h5'
-        model_stacked.load_weights(model_path + weight_filename, by_name=True)
+        model_stacked.load_weights(model_path + weight_filename)
     else:
         raise ValueError("number of stem paths is either '1' or '2'")
     model_stacked.summary()
@@ -66,7 +73,7 @@ def generate(train_valid_split = None, nb_path_for_model = None):
             batch_size=batch_size,
             shuffle=False,
             class_mode='xy_pos',
-            label_file="../../label_list_train1125_15182_aug10_x{}.csv"
+            label_file="../../label_list_train1125_15182_x{}.csv"
             .format(label_scalar))
         with Timer('Generate training position xy'):
             train_pos = model_stacked.predict_generator(generator_train,
@@ -116,7 +123,7 @@ def visualize(dataset_split):
     plt.show()
 
 if __name__ == '__main__':
-    flag_dataset_split = 'train'  # train or valid
+    flag_dataset_split = 'valid'  # train or valid
     flag_1or2_path_model = '1'
-    # generate(train_valid_split=flag_dataset_split, nb_path_for_model=flag_1or2_path_model)
-    visualize(flag_dataset_split)
+    generate(train_valid_split=flag_dataset_split, nb_path_for_model=flag_1or2_path_model)
+    # visualize(flag_dataset_split)

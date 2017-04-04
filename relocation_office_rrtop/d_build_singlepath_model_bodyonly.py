@@ -29,6 +29,7 @@ def build_1path_vgg_bodyonly_model(img_height=448,
                                    dropout_ratio=0.5,
                                    global_learning_rate=1e-5,
                                    learning_rate_multiplier=1.0,
+                                   weight_decay=1e-4,
                                    l1_regularization=0.0,
                                    l2_regularization=0.0,
                                    is_bn_enabled=False,
@@ -123,7 +124,7 @@ def build_1path_vgg_bodyonly_model(img_height=448,
 
     # compile after loading weights
     model.compile(loss='mean_squared_error',
-                  optimizer=SGD(lr=global_learning_rate, momentum=0.9),
+                  optimizer=SGD(lr=global_learning_rate, decay=weight_decay, momentum=0.9),
                   metrics=['mean_squared_error'])
     return model
 
@@ -171,6 +172,7 @@ if __name__ == '__main__':
     nb_hidden_node = 2048
     learning_rate = 1e-3        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
+    w_decay = 5e-5              # lr decay for SGD
     l1_regular = 1e-3           # weight decay in L1 norm
     l2_regular = 1e-3           # L2 norm
     label_scalar = 1            # expend from [0, 1]

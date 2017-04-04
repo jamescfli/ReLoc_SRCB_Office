@@ -17,6 +17,7 @@ if __name__ == '__main__':
     nb_hidden_node = 2048       # hidden node number for each fc layer
     learning_rate = 1e-2        # to conv layers
     lr_multiplier = 1.0         # to top fc layers
+    w_decay = 5e-5              # 1.58e-4 = 3 epoch 0.1 annealing
     l1_regular = 0.0            # weight decay in L1 norm
     l2_regular = 0.0            # L2 norm
     label_scalar = 1            # expend from [0, 1]
@@ -24,8 +25,8 @@ if __name__ == '__main__':
     flag_add_do = False
     # do_ratio = 0.5
     batch_size = 8              # tried 32 (224), 3850MB
-    nb_epoch = 8                # due to higher dimension of 448 img @ network bottle-neck
-    nb_epoch_annealing = 4      # anneal for every <> epochs
+    nb_epoch = 6                # due to higher dimension of 448 img @ network bottle-neck
+    nb_epoch_annealing = 6      # anneal for every <> epochs
     annealing_factor = 0.1
     np.random.seed(7)           # to repeat results
     model_stacked = build_1path_vgg_bodyonly_model(img_height=img_height,
@@ -35,6 +36,7 @@ if __name__ == '__main__':
                                                    # dropout_ratio=do_ratio,
                                                    global_learning_rate=learning_rate,
                                                    learning_rate_multiplier=lr_multiplier,
+                                                   weight_decay=w_decay,
                                                    l1_regularization=l1_regular,
                                                    l2_regularization=l2_regular,
                                                    is_bn_enabled=flag_add_bn,
@@ -94,7 +96,7 @@ if __name__ == '__main__':
                               history_callback.history['val_mean_squared_error']))
 
     np.savetxt(
-        'relocation_office_rrtop/training_procedure/convergence_input{}_{}fc{}bodyonly_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
+        'relocation_office_rrtop/training_procedure/convergence_input{}_{}fc{}bodyonly_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}wd{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.csv'
             .format(img_height,
                     nb_hidden_dense_layer,
                     nb_hidden_node,
@@ -104,6 +106,7 @@ if __name__ == '__main__':
                     nb_epoch,
                     learning_rate,
                     int(lr_multiplier),
+                    w_decay,
                     nb_epoch_annealing,  # aepoch
                     annealing_factor,  # afactor
                     l1_regular,
@@ -111,7 +114,7 @@ if __name__ == '__main__':
         record, delimiter=',')
 
     model_stacked.save_weights(
-        'relocation_office_rrtop/models/weights_input{}_{}fc{}bodyonly_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
+        'relocation_office_rrtop/models/weights_input{}_{}fc{}bodyonly_{}_1125imgx{}_ls{}_{}epoch_sgdlr{:.0e}m{}wd{}ae{}af{}_l1reg{:.0e}l2reg{:.0e}_reloc_model.h5'
             .format(img_height,
                     nb_hidden_dense_layer,
                     nb_hidden_node,
@@ -121,6 +124,7 @@ if __name__ == '__main__':
                     nb_epoch,
                     learning_rate,
                     int(lr_multiplier),
+                    w_decay,
                     nb_epoch_annealing,  # aepoch
                     annealing_factor,  # afactor
                     l1_regular,
