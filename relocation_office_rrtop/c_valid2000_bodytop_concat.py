@@ -2,8 +2,13 @@ __author__ = 'bsl'
 
 import csv
 from PIL import Image as pil_image
-from utils.convert_equirec_to_cube import convert_back_array_wrapper, cut_body_part, cut_top_face
+
+import sys
+sys.path.append('../')
+from utils.convert_equirec_to_cube import convert_back_array_wrapper, cut_body_part, cut_top_face, cut_top_3_quarter
+
 import numpy as np
+
 
 # no need to augment validation set, but concatenation is necessary
 with open('datasets/label_list_w_filename_valid1215_12526_x1.csv') as csvfile:
@@ -26,7 +31,11 @@ with open('datasets/label_list_w_filename_valid1215_12526_x1.csv') as csvfile:
             # concat without vshift or rotation
             concat_in_array = np.hstack((body_img_in_array, top_img_in_array))
             pil_image.fromarray(concat_in_array)\
-                .save('datasets/valid_480x2400_concat_nb2000_20161215/concat/concat_'+row[0])
+                .save('datasets/valid_nb2000_20161215/concat/concat_'+row[0])
+            # cut and save top 3 quarters
+            top_3_quarters_in_array = cut_top_3_quarter(whole_img_in_array)
+            pil_image.fromarray(top_3_quarters_in_array)\
+                .save('datasets/valid_nb2000_20161215/top3quarter/top3quarter_'+row[0])
             # save label to array
             label_list.append([row[1], row[2]])
     # convert with dtype, o.w. TypeError: Mismatch between array dtype ('|S7') and format specifier ('%.18e,%.18e')
@@ -34,29 +43,30 @@ with open('datasets/label_list_w_filename_valid1215_12526_x1.csv') as csvfile:
     assert nb_valid_img == label_list_array.shape[0], 'wrong nb of img for small valid set'
     np.savetxt('datasets/label_list_valid1215_2000_x1.csv', label_list_array, delimiter=',')
 
-import os
+# import os
+# 
+# # draft the label file, by accident overwrite valid2000 folder
+# with open('datasets/label_list_w_filename_valid1215_12526_x1.csv') as csvfile:
+#     nb_img = 12526       # 12526 imgs in valid1215 set
+#     nb_valid_img = 2000  # random choose 2000 imgs as the validation set
+#     label_list = []
+#     name_list_selected = sorted(os.listdir('datasets/valid_480x2400_concat_nb2000_20161215/concat/'))
+#     index_selected = 0
+#     # read the csv file
+#     reader = csv.reader(csvfile, delimiter=',')
+#     for i, row in enumerate(reader):
+#         if row[0] == name_list_selected[index_selected][7:]:
+#             label_list.append([row[1], row[2]])
+#             index_selected += 1
+#             if index_selected == nb_valid_img:
+#                 # got all 2000 label already
+#                 break
+#     label_list_array = np.array(label_list, dtype='float32')
+#     assert nb_valid_img == label_list_array.shape[0], 'wrong nb of img for small valid set'
+#     np.savetxt('datasets/label_list_valid1215_2000_x1.csv', label_list_array, delimiter=',')
+#     print label_list_array.max()
+# 
+#     label_list_array_x10 = label_list_array*10
+#     np.savetxt('datasets/label_list_valid1215_2000_x10.csv', label_list_array_x10, delimiter=',')
+#     print label_list_array_x10.max()
 
-# draft the label file, by accident overwrite valid2000 folder
-with open('datasets/label_list_w_filename_valid1215_12526_x1.csv') as csvfile:
-    nb_img = 12526       # 12526 imgs in valid1215 set
-    nb_valid_img = 2000  # random choose 2000 imgs as the validation set
-    label_list = []
-    name_list_selected = sorted(os.listdir('datasets/valid_480x2400_concat_nb2000_20161215/concat/'))
-    index_selected = 0
-    # read the csv file
-    reader = csv.reader(csvfile, delimiter=',')
-    for i, row in enumerate(reader):
-        if row[0] == name_list_selected[index_selected][7:]:
-            label_list.append([row[1], row[2]])
-            index_selected += 1
-            if index_selected == nb_valid_img:
-                # got all 2000 label already
-                break
-    label_list_array = np.array(label_list, dtype='float32')
-    assert nb_valid_img == label_list_array.shape[0], 'wrong nb of img for small valid set'
-    np.savetxt('datasets/label_list_valid1215_2000_x1.csv', label_list_array, delimiter=',')
-    print label_list_array.max()
-
-    label_list_array_x10 = label_list_array*10
-    np.savetxt('datasets/label_list_valid1215_2000_x10.csv', label_list_array_x10, delimiter=',')
-    print label_list_array_x10.max()

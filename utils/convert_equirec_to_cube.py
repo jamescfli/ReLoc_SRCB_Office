@@ -108,6 +108,10 @@ def cut_body_part(in_img_origin):
     src_img_height = in_img_origin.shape[0]
     return in_img_origin[(src_img_height / 4):(src_img_height * 3 / 4), :, :]
 
+def cut_top_3_quarter(in_img_origin):
+    src_img_height = in_img_origin.shape[0]
+    return in_img_origin[0:(src_img_height * 3 / 4), :, :]
+
 
 # if __name__ == "__main__":
     # # PIL Image
