@@ -17,6 +17,8 @@ with open('datasets/label_list_w_filename_valid1215_12526_x1.csv') as csvfile:
     label_list = []
     np.random.seed(7)
     img_choice_index = np.random.choice(np.arange(nb_img), size=nb_valid_img, replace=False)
+    # back up chosen index
+    np.savetxt('datasets/valid_nb2000_20161215/index_2000_valid.txt', img_choice_index, fmt='%d', delimiter=',')
     img_choice_mask = np.zeros(nb_img, dtype='bool')
     img_choice_mask[img_choice_index] = True
     # read the csv file
